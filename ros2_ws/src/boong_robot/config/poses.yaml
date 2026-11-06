@@ -1,0 +1,64 @@
+# 붕봇 좌표 파일 — 자리가 바뀌면 여기 숫자만 수정
+# posx: [x, y, z, a, b, c]  (mm, deg, 로봇 베이스 기준, 두산 ZYZ 오일러)
+#   [.., 0, 180, 0]  = 툴이 바닥을 향함 (위에서 집기)
+#   [.., -90, 90, 0] = 툴이 수평으로 -y 방향을 향함 (옆에서 집기: 소스통, 틀 손잡이)
+# posj: [j1..j6] (deg)
+# ⚠️ 아래 값은 에뮬레이터용 예시. 토요일에 티치펜던트로 실제 위치를 찍어서 교체!
+
+speed:
+  vel_j: 30      # deg/s   (처음엔 30 이하)
+  acc_j: 30
+  vel_x: 100     # mm/s
+  acc_x: 100
+
+approach_z: 100     # 접근/이탈 거리(mm). 툴이 향한 방향의 "반대쪽"으로 물러났다가 접근
+                    #   (툴이 아래를 향하면 위에서, 수평이면 옆에서 들어간다)
+bake_sec: 3.0       # 굽기 대기 (영상/RViz용으로 짧게)
+flip_bake_sec: 3.0
+flip_lift_mm: 120   # 뒤집기 전에 틀 손잡이를 들어올릴 높이
+bottle_lift_mm: 150 # 소스통을 집은 뒤 들어올리는 높이
+flip_clear_mm: 100  # 틀 위에서 통을 뒤집을 때 확보할 높이 (통이 도는 반경 + 여유)
+
+home: {posj: [0, 0, 90, 0, 90, 0]}
+
+# 소스통 3개 (똑바로 세워 둠, 노즐 위). 몸통 가운데를 옆에서 잡는다 (툴 수평)
+batter_bottle:  {posx: [350, -300, 90, -90, 90, 0]}
+redbean_bottle: {posx: [470, -300, 90, -90, 90, 0]}
+cream_bottle:   {posx: [590, -300, 90, -90, 90, 0]}
+
+# 틀
+# mold_dispense: 통을 든 손이 틀 칸 위에 오는 위치(툴 수평). 통을 뒤집으면 노즐이 손(TCP)보다
+#   통 길이의 절반(약 90mm) 아래로 내려오므로, 노즐이 틀 윗면(z≈130) 위 1~2cm가 되도록
+#   z = 130 + 20 + 90 = 240 으로 잡았다. 통 크기가 다르면 이 값부터 고칠 것.
+mold_dispense: {posx: [470,    0, 240, -90, 90, 0]}
+# mold_handle: 툴을 눕혀서 손잡이 방향을 보게 잡는다 → J6 회전축 = 손잡이 축 → 회전하면 틀이 진짜 뒤집힘
+mold_handle:   {posx: [470,  180, 110, -90, 90, 0]}
+bread_pick:    {posx: [470,    0, 100,   0, 180, 0]}  # 다 익은 붕어빵 집는 위치 (위에서)
+
+# 봉투
+bag_drop:      {posx: [300,  350, 300,   0, 180, 0]}  # 이 위치에서 그리퍼 열어 떨어뜨림
+
+# 재료별 짜기 설정 — 점성이 높을수록 더 닫고(squeeze) 더 오래 누른다
+#   hold    : 손가락이 통에 살짝 닿는 위치 (0 열림 ~ 700 닫힘)
+#   squeeze : 짜는 위치 (hold보다 더 닫힘) — 클수록 세게
+#   squeeze_sec : 누르고 있는 시간 (오래 누르면 그리퍼 과부하 주의, 1~2초 권장)
+# ⚠️ 전부 예시값. 토요일에 실제 통·재료로 보정. 통 안에 남은 양에 따라서도 달라짐.
+materials:
+  batter:  {bottle: batter_bottle,  hold: 380, squeeze: 520, squeeze_sec: 1.2}
+  redbean: {bottle: redbean_bottle, hold: 380, squeeze: 620, squeeze_sec: 2.0}
+  cream:   {bottle: cream_bottle,   hold: 380, squeeze: 560, squeeze_sec: 1.6}
+
+gripper:
+  # 실제 로봇: type을 ros_service로 바꾸면 끝 (그리퍼 = ROBOTIS RH-P12-RN-A, 팀 레포 e0509_gripper_description)
+  #   열기/닫기 → /dsr01/gripper/open, /close (Trigger 서비스)
+  #   hold/squeeze → /dsr01/gripper/position_cmd (Int32, 0 열림 ~ 700 닫힘)
+  # 에뮬레이터/로봇 없이: mock (여닫는 척 기다리기만 함)
+  # digital_out: 컨트롤러 디지털 출력 방식일 때만 (hold/squeeze는 지원 안 함)
+  type: mock
+  namespace: /dsr01/gripper
+  timeout_sec: 5.0
+  wait_sec: 0.8             # 여닫는 동안 기다리는 시간 (ros_service는 1.0 정도로)
+  close: [[1, 1], [2, 0]]
+  open:  [[1, 0], [2, 1]]
+
+scene_frame: base_link      # RViz 마커 기준 프레임 (RViz Fixed Frame과 맞추기)

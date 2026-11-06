@@ -1,0 +1,31 @@
+# 사용: docker/ 폴더에서 ./robot.sh up  (또는 docker compose up -d --build)
+services:
+  dsr:
+    build:
+      context: .
+      args:
+        DRCF_VER: ${DRCF_VER:-2}
+    image: boong/dsr-humble:latest
+    container_name: boong_dsr
+    # 로봇 컨트롤러(192.168.137.x)와 rosbridge(9090)에 바로 닿도록 호스트 네트워크 사용
+    network_mode: host
+    ipc: host
+    env_file: .env
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw          # RViz 화면
+      - /var/run/docker.sock:/var/run/docker.sock # virtual 모드: 에뮬레이터 컨테이너를 호스트에 띄움
+      - ../ros2_ws/src:/root/boong_ws/src         # 우리 ROS 패키지
+      - ./scripts:/root/scripts
+    stdin_open: true
+    tty: true
+    # RViz가 느리면 nvidia-container-toolkit 설치 후 아래 주석 해제 (RTX GPU 사용)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu, graphics, utility]

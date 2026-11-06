@@ -1,0 +1,32 @@
+/* Taiyaki drop into the paper bag one by one (BagStage). Fish fall with gravity, overshoot into the bag and settle;
+   the bag squashes a little on each landing. Transforms are in the SVG's source-pixel units. */
+.bag-art { display: block; }
+.bag-art__bag { transform-box: view-box; transform-origin: 646px 1090px; }
+.bag-art__sink { transition: transform 520ms var(--ease-out); }
+.bag-art--closing .bag-art__sink { transform: translateY(90px); }
+
+.bag-art__fish {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: bag-art-drop 700ms both;
+}
+@keyframes bag-art-drop {
+  0% { transform: translateY(-760px) rotate(var(--tilt)); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  62% { transform: translateY(26px) rotate(0deg) scale(1.04, 0.94); animation-timing-function: ease-out; }
+  80% { transform: translateY(-12px) scale(0.98, 1.02); animation-timing-function: ease-in-out; }
+  100% { transform: none; }
+}
+@keyframes bag-art-thud {
+  0%, 100% { transform: none; }
+  35% { transform: scale(1.025, 0.965); }
+}
+@keyframes bag-art-hop {
+  0%, 100% { transform: none; }
+  30% { transform: scale(1.03, 0.95); }
+  60% { transform: translateY(-26px) scale(0.98, 1.03); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bag-art__fish, .bag-art__bag { animation: none !important; }
+  .bag-art__sink { transition: none; }
+}

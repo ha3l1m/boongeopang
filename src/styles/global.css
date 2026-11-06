@@ -1,0 +1,115 @@
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--bg);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+h1, h2, h3 { font-family: var(--font-title); font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+p { margin: 0; }
+
+.app {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--page);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.page { padding: 12px 20px calc(var(--tab-h) + 120px); animation: page-in 360ms var(--ease-out) both; }
+.page--plain { padding-bottom: 40px; }
+
+/* Every header: optional button on the left, title always centered (an empty right column balances it). */
+.topbar { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; min-height: 48px; margin: 0 -8px 8px; }
+.topbar__title { grid-column: 2; text-align: center; font-family: var(--font-title); font-weight: 700; font-size: 17px; }
+.icon-btn {
+  min-width: 40px; padding: 0 12px;
+  height: 36px; border-radius: var(--r-pill); border: none; font-size: 14px; font-weight: 600;
+  background: transparent; color: var(--ink-soft);
+  display: grid; place-items: center; transition: background 160ms ease, transform 160ms var(--ease-out);
+}
+.icon-btn:active { background: var(--bg); transform: scale(0.94); }
+
+.btn {
+  /* Flex centering keeps labels dead-center for both <button> and <a> buttons. */
+  display: inline-flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; line-height: 1.2;
+  border: none; border-radius: 16px; padding: 16px 20px; min-height: 56px;
+  font-family: var(--font-title); font-weight: 700; font-size: 17px;
+  transition: transform 160ms var(--ease-out), background 160ms ease, filter 160ms ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn--primary { background: var(--gold); color: var(--white); }
+.btn--primary:active { background: var(--gold-deep); }
+.btn--ghost { background: var(--white); color: var(--ink); }
+.btn--ghost:active { background: var(--paper-deep); }
+.btn--block { width: 100%; }
+.btn[aria-busy='true'] { opacity: 0.8; }
+.btn:disabled { cursor: default; }
+
+.card { background: var(--white); border-radius: var(--r-card); box-shadow: var(--clay-shadow); padding: 20px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg); color: var(--ink-soft); border-radius: var(--r-pill); border: none;
+  padding: 5px 10px; font-size: 13px; font-weight: 600;
+}
+.chip--live { background: var(--butter); color: var(--gold-deep); }
+.chip--done { background: var(--mint); color: var(--mint-ink); }
+.chip--cancel { background: #ffeeee; color: var(--stamp); }
+
+.bubble {
+  position: relative; background: var(--white); border-radius: 18px; padding: 10px 16px;
+  font-family: var(--font-title); font-weight: 600; font-size: 15px;
+  box-shadow: 0 4px 20px rgba(25, 31, 40, 0.08);
+}
+.bubble::after {
+  content: ''; position: absolute; left: 28px; bottom: -6px; width: 12px; height: 12px;
+  background: var(--white); transform: rotate(45deg); border-radius: 2px;
+}
+
+.bubble--up::after { left: 50%; margin-left: -6px; }
+.bubble--down::after { top: -6px; bottom: auto; left: 50%; margin-left: -6px; }
+
+.muted { color: var(--ink-soft); font-size: 13px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--tab-h) + 110px); transform: translateX(-50%);
+  background: rgba(25, 31, 40, 0.92); color: var(--white); padding: 12px 18px; border-radius: 14px;
+  font-size: 14px; font-weight: 600; z-index: 30; animation: pop 260ms var(--ease-spring);
+}
+
+/* Opacity only: a transform here would trap the page's position:fixed bars. */
+@keyframes page-in { from { opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+@keyframes pop { from { transform: translate(-50%, 12px) scale(0.96); opacity: 0; } }
+@keyframes bump { 40% { transform: scale(1.18); } }
+@keyframes bob { 50% { transform: translateY(-6px); } }
+@keyframes wiggle { 25% { transform: rotate(-6deg); } 75% { transform: rotate(6deg); } }
+@keyframes drop { from { transform: translateY(-40px) scale(0.6); opacity: 0; } 70% { transform: translateY(4px) scale(1.05); opacity: 1; } }
+@keyframes steam { from { transform: translateY(0) scale(0.8); opacity: 0; } 30% { opacity: 0.7; } to { transform: translateY(-28px) scale(1.2); opacity: 0; } }
+@keyframes wave { 50% { transform: rotate(-18deg); } }
+@keyframes sparkle { 50% { transform: scale(1.25); opacity: 1; } }
+@keyframes glow { 50% { transform: scale(1.06); opacity: 0.85; } }
+
+.bob { animation: bob 2.4s ease-in-out infinite; }
+.wiggle { animation: wiggle 0.4s ease; }
+.rise { animation: rise 480ms var(--ease-out) both; }
+
+/* Soft warm halo behind 3D characters, like a spotlight on a clean white page. */
+.halo { position: relative; isolation: isolate; }
+.halo::before {
+  content: ''; position: absolute; inset: 6% 12%; z-index: -1; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 170, 80, 0.38), rgba(255, 200, 140, 0.16) 60%, rgba(255, 255, 255, 0));
+  animation: glow 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+.halo .stage { border-radius: 24px; overflow: hidden; }

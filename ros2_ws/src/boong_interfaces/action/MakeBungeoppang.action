@@ -1,0 +1,16 @@
+# Goal: 붕어빵 주문
+string order_id
+int32 order_number
+string flavor          # "redbean" | "cream"
+int32 qty
+---
+# Result: 붕어빵 완성
+bool success
+string order_id
+string message
+---
+# Feedback: 웹앱 단계와 같은 이름
+string step            # "batter" | "filling" | "baking" | "packed" | "ready"
+string detail          # 예: "반죽 컵 집는 중"
+int32 piece_index      # 몇 번째 붕어빵 (1부터)
+float32 progress       # 0.0 ~ 1.0

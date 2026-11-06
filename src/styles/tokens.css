@@ -1,0 +1,34 @@
+:root {
+  /* Toss-clean neutrals with 붕어빵 orange as the single accent. Legacy names kept so components stay stable. */
+  --white: #ffffff;
+  --bg: #f2f4f6;
+  /* Warm beige page so white cards read without shadows. */
+  --page: #f7f1e8;
+  --cream: #f9fafb;
+  --butter: #fff3e0;
+  --sky: #ffffff;
+  --gold: #ff9a1f;
+  --gold-deep: #f08400;
+  --crust: #f08400;
+  --ink: #191f28;
+  --ink-soft: #6b7684;
+  --ink-faint: #8b95a1;
+  --stamp: #f04452;
+  --paper: #f2f4f6;
+  --paper-deep: #e5e8eb;
+  --mint: #e8f7ee;
+  --mint-ink: #12a150;
+  --line: #e5e8eb;
+
+  --font-title: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+  --font-body: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+
+  --r-card: 20px;
+  --r-pill: 999px;
+  --clay-shadow: none;
+  --press-shadow: none;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --tab-h: 64px;
+  --max-w: 480px;
+}
