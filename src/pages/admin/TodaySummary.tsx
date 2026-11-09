@@ -19,11 +19,11 @@ export function TodaySummary({ summary }: { summary: DaySummary }) {
             <strong>{summary.byFlavor[m.flavor]}마리</strong>
           </li>
         ))}
+        <li className="admin-stat admin-stat--cancel">
+          <span className="muted">취소</span>
+          <strong>{summary.cancelled}건</strong>
+        </li>
       </ul>
-      <div className="admin-stat admin-stat--cancel">
-        <span className="muted">취소</span>
-        <strong>{summary.cancelled}건</strong>
-      </div>
     </section>
   )
 }

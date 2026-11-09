@@ -1,6 +1,6 @@
 import { useId } from 'react'
 
-type Props = { name: string; filling: string; qty: number; phase: number }
+type Props = { name: string; filling: string; qty: number; phase: number; badge?: string }
 
 /** public/art/fish.webp is 360x253; the bite is taken from the lips, stopping short of the eye at (76, 123). */
 const FISH_W = 360
@@ -14,7 +14,7 @@ function toothAt(deg: number) {
 }
 
 /** Clay taiyaki with a bite out of its head showing the filling; bobs in its tile and hops on every pick. */
-export function MenuFish({ name, filling, qty, phase }: Props) {
+export function MenuFish({ name, filling, qty, phase, badge }: Props) {
   const id = useId()
   return (
     <figure className="menu__fish">
@@ -54,6 +54,7 @@ export function MenuFish({ name, filling, qty, phase }: Props) {
           <image href="/art/fish.webp" width={FISH_W} height={FISH_H} mask={`url(#${id}-bite)`} />
         </svg>
       </span>
+      {badge && <span className="menu__fish-badge">{badge}</span>}
     </figure>
   )
 }

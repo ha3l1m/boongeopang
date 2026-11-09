@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { MENU, MAX_PER_FLAVOR, MAX_TOTAL, formatWon } from '../domain/menu'
+import { MENU, MAX_PER_FLAVOR, MAX_TOTAL, formatWon, menuItem, type Flavor } from '../domain/menu'
 import { canAdd, cartCount } from '../domain/order'
 import { useCart } from '../state/CartContext'
 import { MenuFish } from '../components/MenuFish'
@@ -10,6 +10,7 @@ import { useGoHome, useToast } from '../components/hooks'
 import { stockLeft } from '../domain/robot'
 import { listAllOrders } from '../services/orderService'
 import { readRobot } from '../services/robotService'
+import { canOrderFlavor } from '../services/remoteSync'
 
 export function MenuPage() {
   const { cart, add, remove, clear } = useCart()
@@ -29,8 +30,10 @@ export function MenuPage() {
     navigate('/confirm')
   }
 
-  const blocked = (flavor: keyof typeof cart) =>
-    (cart[flavor] ?? 0) >= available(flavor)
+  const blocked = (flavor: Flavor) =>
+    !canOrderFlavor(flavor)
+      ? showToast(`${menuItem(flavor).name}은 아직 준비 중이에요`)
+      : (cart[flavor] ?? 0) >= available(flavor)
       ? showToast('재료가 떨어졌어요. 다른 맛은 어때요?')
       : showToast((cart[flavor] ?? 0) >= MAX_PER_FLAVOR ? `한 맛은 ${MAX_PER_FLAVOR}마리까지예요` : `한 번에 ${MAX_TOTAL}마리까지예요`)
 
@@ -46,13 +49,14 @@ export function MenuPage() {
       <ul className="menu__list">
         {MENU.map((item, index) => {
           const qty = cart[item.flavor] ?? 0
+          const preparing = !canOrderFlavor(item.flavor)
           const soldOut = available(item.flavor) <= 0
           return (
-            <li key={item.flavor} className={`card menu__item ${qty > 0 ? 'menu__item--on' : ''} ${soldOut ? 'menu__item--soldout' : ''}`}>
-              <MenuFish name={item.name} filling={item.color} qty={qty} phase={index * 1.7} />
+            <li key={item.flavor} className={`card menu__item ${qty > 0 ? 'menu__item--on' : ''} ${preparing || soldOut ? 'menu__item--soldout' : ''}`}>
+              <MenuFish name={item.name} filling={item.color} qty={qty} phase={index * 1.7} badge={preparing ? '준비 중' : undefined} />
               <div className="menu__info">
                 <div className="menu__head">
-                  <h3>{item.name}{soldOut && <span className="chip chip--cancel menu__soldout">품절</span>}</h3>
+                  <h3>{item.name}{soldOut && !preparing && <span className="chip chip--cancel menu__soldout">품절</span>}</h3>
                   <span className="filling-tag">
                     <i className="filling-tag__swatch" style={{ background: item.color }} aria-hidden="true" />
                     {item.fillingName}
@@ -64,7 +68,7 @@ export function MenuPage() {
                   <QtyStepper
                     label={item.name}
                     qty={qty}
-                    canAdd={canAdd(cart, item.flavor) && qty < available(item.flavor)}
+                    canAdd={!preparing && canAdd(cart, item.flavor) && qty < available(item.flavor)}
                     onAdd={() => add(item.flavor)}
                     onRemove={() => remove(item.flavor)}
                     onBlocked={() => blocked(item.flavor)}

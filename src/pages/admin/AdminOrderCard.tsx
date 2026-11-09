@@ -55,7 +55,13 @@ export function AdminOrderCard({ order, status, now, pauses, paused, selected, o
             <i aria-hidden="true" />
             {progressText(status, paused)}
           </span>
-          {baking && (
+          {order.robot?.queue && !done && (
+            <span className="admin-order__eta">
+              <small>붕봇 대기</small>
+              <b>{order.robot.queue}번째</b>
+            </span>
+          )}
+          {baking && !order.robot && (
             <span className="admin-order__eta">
               <small>픽업까지</small>
               <b>{formatEta(secondsLeft(timerStartOf(order), now, pauses))}</b>

@@ -4,6 +4,7 @@ import { effectiveStatus, isTerminal, type AdminStatus, type Order } from '../..
 import { listAllOrders, setOrderStatus, summarizeDay } from '../../services/orderService'
 import { adminLogout } from '../../services/adminAuth'
 import { readRobot } from '../../services/robotService'
+import { remoteMode } from '../../services/remoteSync'
 import { INGREDIENTS, LOW_STOCK_RATIO, currentJob, isPaused, stockLeft } from '../../domain/robot'
 import { useNow } from '../../components/hooks'
 import { AdminNav, type Tab } from './AdminNav'
@@ -50,7 +51,8 @@ export function AdminOrdersPage() {
   const liveCount = orders.filter((o) => !isTerminal(o.status)).length
 
   const change = (order: Order, status: AdminStatus) => {
-    const question = CONFIRM_TEXT[status]
+    // There is no cancel service yet, so the robot keeps baking what it already accepted.
+    const question = status === 'cancelled' && order.robot ? '이 주문을 취소할까요? 이미 붕봇에 전달된 몫은 계속 구워져요.' : CONFIRM_TEXT[status]
     if (question && !window.confirm(`${orderNo(order)} — ${question}`)) return
     try {
       setOrderStatus(order.id, status)
@@ -91,7 +93,7 @@ export function AdminOrdersPage() {
               <TodaySummary summary={summary} />
               <div className="admin__control">
                 <StockBars stock={stock} {...notify} />
-                <RobotDemo robot={robot} current={currentJob(orders).current} {...notify} />
+                {!remoteMode() && <RobotDemo robot={robot} current={currentJob(orders).current} {...notify} />}
               </div>
             </>
           ) : tab === 'feedback' ? (

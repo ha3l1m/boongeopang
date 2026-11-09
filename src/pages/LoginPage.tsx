@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { startTransition, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext'
 import logoFactory from '../assets/logo-hoho-factory.svg'
@@ -10,10 +10,13 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
 
-  const enter = () => {
+  const enter = (to: string) => {
     try {
-      login()
-      navigate('/', { replace: true })
+      // One update for both: otherwise the signed-in /login route sends us to '/' before this navigation lands.
+      startTransition(() => {
+        login()
+        navigate(to, { replace: true })
+      })
     } catch {
       setError('입장이 안 됐어요. 다시 눌러 줘요')
     }
@@ -31,9 +34,14 @@ export function LoginPage() {
       </div>
       <div className="login__cta">
         {error && <p role="alert" className="error">{error}</p>}
-        <button type="button" className="btn btn--primary btn--block" onClick={enter}>
-          붕어빵 주문
-        </button>
+        <div className="login__actions">
+          <button type="button" className="btn btn--ghost" onClick={() => enter('/voice')}>
+            음성 주문
+          </button>
+          <button type="button" className="btn btn--primary" onClick={() => enter('/')}>
+            붕어빵 주문
+          </button>
+        </div>
         <p className="login__note">MVP 체험용이라 누르면 바로 입장해요</p>
       </div>
     </main>

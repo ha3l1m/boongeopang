@@ -6,7 +6,7 @@ RTX 노트북에서 Docker 컨테이너 하나로 **두산 ROS2 드라이버(Hum
 ```
 [RTX 노트북 (Linux)]
  └─ docker: boong_dsr  (network_mode: host)
-      ├─ dsr_bringup2 ──TCP 12345──▶ [E0509 컨트롤러 192.168.137.x]   (real)
+      ├─ dsr_bringup2 ──TCP 12345──▶ [E0509 컨트롤러 110.120.1.64]   (real)
       │               └────────────▶ [dsr_emulator 컨테이너 127.0.0.1] (virtual)
       ├─ boong 노드들 (ros2_ws/src 마운트)
       └─ rosbridge :9090 ◀── WebSocket ── [React 웹앱 localhost:5179]
@@ -31,31 +31,49 @@ RTX 노트북에서 Docker 컨테이너 하나로 **두산 ROS2 드라이버(Hum
 
 ## 2. 실제 로봇 (real 모드) — 토·월 현장
 
-1. 노트북 유선 랜 ↔ 컨트롤러 케이블 연결, 노트북 유선 IP를 **고정**: `192.168.137.50 / 255.255.255.0` (로봇과 겹치지 않는 번호)
+1. 노트북 유선 랜 ↔ 컨트롤러 케이블 연결, 노트북 유선 IP를 **고정**
+   - 주소 `110.120.1.<번호>` / 서브넷 `255.255.255.0` / 게이트웨이 `110.120.1.1` / DNS `8.8.8.8`
+   - **`<번호>`가 다른 조와 겹치면 연결이 안 됩니다.** 조끼리 번호를 나눠 쓰고, 로봇 번호(64)도 피하세요.
+   - 유선을 꽂은 뒤 인터넷이 끊기면 와이파이가 우선이 되도록 네트워크 순서를 바꾸세요.
 2. 티치펜던트: 로봇 서보 ON, **원격/자동 제어 허용**(제어 인증), 속도 저속
 3. 컨트롤러 IP 찾기
    ```bash
-   ./robot.sh check                  # .env의 ROBOT_HOST 점검, 실패 시 대역 전체 스캔
-   ./robot.sh check 192.168.137.64   # 특정 IP 점검
+   ./robot.sh check                # .env의 ROBOT_HOST 점검, 실패 시 대역 전체 스캔 (유선 주소가 있을 때만)
+   ./robot.sh check 110.120.1.64   # 우리 조 로봇 점검
    ```
    - 라벨 IP와 실제가 다를 수 있음(지난번 65 ↔ 64). **스캔에서 나온 IP를 기준으로.**
    - 찾은 IP를 로봇 몸체에 테이프로 붙여 두기 (안 되는 로봇도 표시)
-4. `.env` 수정: `ROBOT_MODE=real`, `ROBOT_HOST=<찾은 IP>` → `./robot.sh down && ./robot.sh up`
+4. `.env` 수정: `ROBOT_MODE=real`, `ROBOT_HOST=110.120.1.64` → `./robot.sh down && ./robot.sh up`
 5. `./robot.sh bringup` → RViz 자세가 실제 로봇과 같은지 확인
 6. 비상정지 버튼 쥔 상태로 `./robot.sh test`
 
 ## 3. 웹앱 연동
 
-```bash
-./robot.sh bridge      # ws://<노트북IP>:9090
+손님 폰과 관리자 노트북이 같은 주문을 보도록 **공유 서버**가 중간에 있습니다. 브라우저는 서버(`/api`)만 보고, 로봇과 통신하는 건 서버뿐입니다.
+
 ```
-웹앱 `.env.local`: `VITE_ROBOT_MODE=ros`, `VITE_ROSBRIDGE_URL=ws://<노트북IP>:9090` (같은 노트북이면 `ws://localhost:9090`)
+폰 / 대시보드 ─ /api ─▶ 공유 서버(npm run server, 주문은 .boong-data/state.json) ─ ws ─▶ rosbridge :9090 ─▶ order_manager
+```
+
+```bash
+# 로봇 없이 가상으로 (Mac 가능). 실제 로봇은 up / boong 사용
+cd docker && ./robot.sh up-mock && ./robot.sh ws && ./robot.sh boong mock   # 터미널 1
+npm run server                                                              # 터미널 2 (저장소 루트)
+npm run dev -- --host --port 5179                                           # 터미널 3
+```
+웹앱 `.env.local`: `VITE_ROBOT_MODE=ros`, `VITE_ADMIN_PIN=<숫자 4~8자리>`. 지우거나 `mock`이면 서버 없이 브라우저 안에서만 동작합니다.
+
+- 대시보드: `http://localhost:5179/admin` / 손님 폰(같은 Wi-Fi): `http://<노트북IP>:5179`
+- 서버가 rosbridge를 다른 곳에서 찾으면 `ROSBRIDGE_URL=ws://<IP>:9090 npm run server`
+- 비상 정지는 웹으로 안 됩니다. **티치펜던트/비상정지 버튼을 쓰세요.** 웹 주문 취소도 이미 전달된 몫을 멈추지 않습니다.
+- 같은 Wi-Fi면 누구나 API를 호출할 수 있어 시연 전용입니다. 인터넷에 공개하지 마세요.
+- **음성 주문**(로그인 화면의 "음성 주문")은 브라우저 음성 인식을 쓰므로 **https 또는 localhost 주소에서만** 됩니다. 폰에서 `http://<노트북IP>:5179`로 열면 안내 문구가 나오고 터치 주문으로 넘어갑니다. 폰에서 음성을 쓰려면 3번 터미널을 `npm run dev -- --host --port 5179` 대신 `npm run dev:https -- --port 5179`로 띄우고 `https://<노트북IP>:5179`로 접속하세요. 자체 서명 인증서라 첫 접속에 경고가 나오니 "고급 → 계속 진행"을 누르면 됩니다(인증서는 30일짜리 개발용). 말한 내용은 장바구니에만 담기고, 주문은 확인 화면에서 눌러야 확정됩니다.
 
 ## 4. 안 될 때
 
 | 증상 | 확인 |
 |---|---|
-| `check`에서 192.168.137.x 주소 없음 | 노트북 유선 IP 고정 안 됨 / 와이파이로만 연결 |
+| `check`에서 110.120.1.x 주소 없음 | 노트북 유선 IP 고정 안 됨 / 와이파이로만 연결 |
 | ping은 되는데 12345 닫힘 | 티치펜던트 원격 제어 허용, 컨트롤러 재부팅 |
 | bringup 연결 직후 끊김 | `DRCF_VER` 불일치 → 펜던트에서 컨트롤러 버전 확인, `.env` 수정 후 `./robot.sh build` |
 | RViz 창 안 뜸 | 호스트에서 `xhost +local:docker`, `echo $DISPLAY` |

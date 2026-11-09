@@ -67,7 +67,7 @@
 .login--factory .login__note { color: #FFF3DC; text-shadow: 0 1px 3px rgba(46, 22, 8, 0.55); }
 
 /* Menu */
-.menu__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.menu__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .menu__item {
   display: flex; align-items: center; gap: 12px; padding: 18px 14px 18px 14px;
   border: 1.5px solid transparent; transition: border-color 200ms ease, transform 200ms var(--ease-out), box-shadow 200ms ease;
@@ -79,7 +79,8 @@
 .menu__item:active { transform: scale(0.985); }
 .menu__item--on { border-color: var(--gold); box-shadow: 0 4px 20px rgba(255, 154, 31, 0.16); }
 .menu__fish { flex: none; align-self: flex-start; width: 84px; height: 84px; border-radius: 16px; background: var(--butter); overflow: hidden;
-  margin: 0; display: grid; place-items: center; }
+  margin: 0; display: grid; place-items: center; position: relative; }
+.menu__fish-badge { position: absolute; inset: auto 0 0; padding: 4px 0; background: rgba(25, 31, 40, 0.78); color: var(--white); font-size: 12px; font-weight: 600; text-align: center; }
 .menu__fish-hop { display: block; animation: menu-fish-hop 460ms var(--ease-spring); }
 .menu__fish-img { display: block; animation: bob 3.2s ease-in-out infinite; filter: drop-shadow(0 4px 4px rgba(122, 74, 28, 0.18)); }
 @keyframes menu-fish-hop { 40% { transform: translateY(-10px) rotate(-6deg) scale(1.06); } }
@@ -90,7 +91,9 @@
 .menu__head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .menu__head .filling-tag { margin: 0; font-size: 12px; padding: 2px 8px 2px 3px; gap: 4px; white-space: nowrap; }
 .menu__head .filling-tag__swatch { width: 14px; height: 14px; }
-.menu__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.menu__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+/* Small phones: the price and stepper need 165px, so give the card's own spacing back instead of overflowing. */
+@media (max-width: 340px) { .menu__item { gap: 8px; padding-left: 8px; padding-right: 8px; } }
 .menu__price { font-weight: 700; font-size: 17px; color: var(--ink); }
 
 
@@ -234,3 +237,47 @@
   font-size: 14px; font-weight: 700; text-decoration: none;
 }
 .history__rate:active { background: var(--paper-deep); }
+
+/* Voice order: one big mic button, what it heard, then the same receipt as the confirm page. */
+.login__actions { display: flex; flex-direction: row; gap: 10px; }
+.login__actions .btn { word-break: keep-all; white-space: nowrap; }
+/* Voice order sits at the left edge, only as wide as its label; the main button takes the rest, at the right. */
+.login__actions .btn--ghost { flex: 0 0 auto; padding-left: 26px; padding-right: 26px; }
+.login__actions .btn--primary { flex: 1 1 auto; min-width: 0; }
+.voice__stage { display: grid; justify-items: center; gap: 22px; padding: 20px 0 12px; text-align: center; }
+.voice__mic {
+  width: 112px; height: 112px; border-radius: 50%; border: none; cursor: pointer;
+  display: grid; place-items: center; color: var(--white);
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+  box-shadow: 0 8px 24px rgba(255, 154, 31, 0.35);
+  transition: transform 160ms var(--ease-out);
+}
+.voice__mic:active { transform: scale(0.94); }
+.voice__mic--on { animation: voice-pulse 1.2s ease-in-out infinite; }
+@keyframes voice-pulse { 50% { box-shadow: 0 0 0 18px rgba(255, 154, 31, 0.18), 0 8px 24px rgba(255, 154, 31, 0.35); } }
+@media (prefers-reduced-motion: reduce) { .voice__mic--on { animation: none; outline: 4px solid rgba(255, 154, 31, 0.4); } }
+.voice__hint { color: var(--ink-soft); font-size: 15px; }
+.voice__heard { font-size: 20px; font-weight: 700; color: var(--ink); word-break: keep-all; }
+.voice__note { color: var(--ink-soft); font-size: 14px; text-align: center; word-break: keep-all; }
+/* Options under the heard order: name and price on the left, the same stepper as the menu on the right. */
+.voice__opt-name { display: flex; align-items: center; flex-wrap: wrap; gap: 0 6px; min-width: 0; font-weight: 600; }
+.voice__opt-name small { font-weight: 500; }
+.voice__options li { align-items: center; }
+.voice__opt--off { opacity: 0.55; }
+/* The touch button hugs its label; the confirm button takes the rest. keep-all breaks only at spaces. */
+.voice .bottom-actions { grid-template-columns: auto 1fr; }
+.voice .bottom-actions .btn { word-break: keep-all; }
+.voice .bottom-actions .btn--ghost { white-space: nowrap; }
+.voice .bottom-actions .btn:disabled { opacity: 0.4; }
+
+/* On-screen recognition log: a phone has no console, so what the microphone and the recogniser received is shown here. */
+.voice__logbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.voice__logbar button { border: none; border-radius: var(--r-pill); background: var(--white); color: var(--ink-soft); font: inherit; font-size: 13px; font-weight: 600; min-height: 32px; padding: 6px 12px; }
+.voice__log { margin: 8px 0 12px; padding: 10px 12px; border-radius: 14px; background: var(--ink); color: #d7dde6; max-height: 170px; overflow-y: auto; text-align: left;
+  font: 12px/1.5 ui-monospace, 'SF Mono', Menlo, monospace; -webkit-overflow-scrolling: touch; }
+.voice__log ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.voice__log li { white-space: pre-wrap; word-break: break-word; }
+.voice__log-final { color: #9be7a8; }
+.voice__log-interim { color: #8aa0b8; }
+.voice__log-error { color: #ff9b8a; }
+.voice__log-empty { margin: 0; color: #8aa0b8; }

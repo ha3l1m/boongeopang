@@ -1,20 +1,12 @@
-import { FEEDBACK_DELAY_MS, SCORES, type Feedback, type FeedbackInput, type Score } from '../domain/feedback'
+import { FEEDBACK_DELAY_MS, SCORES, isFeedback, type Feedback, type FeedbackInput, type Score } from '../domain/feedback'
 import type { Flavor } from '../domain/menu'
 import type { Order } from '../domain/order'
+import { newId } from './id'
+import { FEEDBACK_KEY, pushFeedback, remoteMode } from './remoteSync'
 import { readJson, writeJson } from './storage'
 
-const FEEDBACK_KEY = 'boong:feedback'
 const SKIP_KEY = 'boong:feedback-skip'
 const SEEN_KEY = 'boong:pickup-seen'
-
-function isFeedback(value: unknown): value is Feedback {
-  const v = value as Feedback
-  return (
-    typeof v === 'object' && v !== null &&
-    typeof v.orderId === 'string' && typeof v.userId === 'string' && typeof v.createdAt === 'string' &&
-    Array.isArray(v.flavors) && typeof v.scores === 'object' && v.scores !== null
-  )
-}
 
 export function listFeedback(): Feedback[] {
   const value = readJson<unknown>(FEEDBACK_KEY, [])
@@ -65,7 +57,7 @@ export function submitFeedback(order: Order, input: FeedbackInput, now: Date = n
   const all = listFeedback()
   if (all.some((f) => f.orderId === order.id)) throw new Error('이미 피드백을 보냈어요')
   const feedback: Feedback = {
-    id: crypto.randomUUID(),
+    id: newId(),
     orderId: order.id,
     userId: order.userId,
     flavors,
@@ -74,6 +66,7 @@ export function submitFeedback(order: Order, input: FeedbackInput, now: Date = n
     createdAt: now.toISOString(),
   }
   writeJson(FEEDBACK_KEY, [...all, feedback])
+  if (remoteMode()) pushFeedback(feedback)
   return feedback
 }
 

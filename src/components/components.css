@@ -102,3 +102,16 @@
 @keyframes sheet-up { from { transform: translateY(100%); } }
 @keyframes sheet-fade { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .sheet, .sheet-backdrop { animation: none; } }
+
+.robot-link {
+  /* A strip above the page instead of a floating pill, so it never covers a header. */
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  margin: 0;
+  padding: 6px 14px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+}

@@ -37,6 +37,13 @@ class OrderManager(Node):
         if req.flavor not in ("redbean", "cream") or req.qty < 1:
             res.accepted, res.message = False, "단팥(redbean) / 슈크림(cream), 1개 이상만 가능해요"
             return res
+        # 응답이 유실돼 웹이 다시 보내도 두 번 굽지 않게. 실패한 건은 재전송을 받는다.
+        known = [*([self.current] if self.current else []), *self.queue, *self.done]
+        if req.order_id and any(
+            o["order_id"] == req.order_id and o["flavor"] == req.flavor and o["state"] != "failed" for o in known
+        ):
+            res.accepted, res.message = True, "이미 접수된 주문"
+            return res
         order = {
             "order_id": req.order_id or str(uuid.uuid4()),
             "number": req.order_number,
