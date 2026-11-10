@@ -2,13 +2,19 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { formatWon, menuItem } from '../domain/menu'
 import { cartTotal, toOrderItems } from '../domain/order'
-import { createOrder } from '../services/orderService'
+import { placeOrder } from '../services/orderService'
 import { useAuth } from '../state/AuthContext'
 import { useCart } from '../state/CartContext'
 import { BagStage } from '../components/BagStage'
 import { Icon } from '../components/Icon'
 
 const SUBMIT_DELAY_MS = 1200
+
+function submitError(e: unknown): string {
+  if (!(e instanceof Error)) return '주문이 안 들어갔어요. 다시 시도해 줘요'
+  if (e.message.startsWith('재료')) return `${e.message}. 메뉴를 다시 골라 줘요`
+  return e.message.startsWith('붕봇') ? e.message : '주문이 안 들어갔어요. 다시 시도해 줘요'
+}
 
 export function ConfirmPage() {
   const { user } = useAuth()
@@ -25,14 +31,14 @@ export function ConfirmPage() {
   const submit = () => {
     setSubmitting(true)
     setError(null)
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        const order = createOrder(user.id, cart, memo)
+        const order = await placeOrder(user.id, cart, memo)
         clear()
         navigate(`/orders/${order.id}`, { replace: true, state: { fresh: true } })
       } catch (e) {
         setSubmitting(false)
-        setError(e instanceof Error && e.message.startsWith('재료') ? `${e.message}. 메뉴를 다시 골라 줘요` : '주문이 안 들어갔어요. 다시 시도해 줘요')
+        setError(submitError(e))
       }
     }, SUBMIT_DELAY_MS)
   }

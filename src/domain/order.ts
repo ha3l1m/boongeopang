@@ -21,8 +21,21 @@ export type Order = {
   createdAt: string
   manualStatus?: AdminStatus
   timerStart?: string
+  /** Set only when a real robot queue bakes this order; the mock timer is not used then. */
+  robot?: OrderRobot
 }
 
+export type RobotSend = 'sending' | 'accepted' | 'failed'
+
+export type OrderRobot = {
+  sends: Partial<Record<Flavor, RobotSend>>
+  steps: Partial<Record<Flavor, OrderStatus>>
+  /** Place in the robot queue while waiting; absent once baking starts. */
+  queue?: number
+  failed?: string
+}
+
+export const MEMO_MAX = 50
 export const STEP_SECONDS = 8
 
 export const STEP_LABEL: Record<OrderStatus, string> = {
@@ -99,8 +112,34 @@ export function timerStartOf(order: Order): string {
   return order.timerStart ?? order.createdAt
 }
 
+/** One flavor bakes at a time, so an order follows that flavor and is ready only when all are. */
+export function robotStep(items: readonly OrderItem[], robot: OrderRobot): OrderStatus {
+  const steps = items.map((item) => robot.steps[item.flavor] ?? 'received')
+  if (steps.every((step) => step === 'ready')) return 'ready'
+  const active = steps.find((step) => step !== 'received' && step !== 'ready')
+  if (active) return active
+  return steps.includes('ready') ? 'baking' : 'received'
+}
+
+export function undelivered(order: Order): OrderItem[] {
+  return order.items.filter((item) => order.robot?.sends[item.flavor] === 'failed')
+}
+
 export function effectiveStatus(order: Order, now: Date, pauses: readonly Pause[] = []): AdminStatus {
-  return order.manualStatus ?? statusAt(timerStartOf(order), now, pauses)
+  if (order.manualStatus) return order.manualStatus
+  return order.robot ? robotStep(order.items, order.robot) : statusAt(timerStartOf(order), now, pauses)
+}
+
+export function buildOrder(fields: { id: string; number: number; userId: string; cart: Cart; memo: string; now: Date }): Order {
+  return {
+    id: fields.id,
+    number: fields.number,
+    userId: fields.userId,
+    items: toOrderItems(fields.cart),
+    memo: fields.memo.trim().slice(0, MEMO_MAX),
+    total: cartTotal(fields.cart),
+    createdAt: fields.now.toISOString(),
+  }
 }
 
 export function nextStatus(status: AdminStatus): AdminStatus {

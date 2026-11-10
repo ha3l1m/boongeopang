@@ -1,0 +1,19 @@
+# 붕붕 붕어빵 — 로봇 없는 mock 전용 이미지 (Mac arm64 / amd64 공용)
+# 두산 드라이버·RViz·에뮬레이터 없음: 주문 큐, mock 동작, rosbridge만 돌린다.
+FROM ros:humble-ros-base
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    ROS_DISTRO=humble \
+    BOONG_WS=/root/boong_ws
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ros-humble-rosbridge-suite ros-humble-visualization-msgs ros-humble-rosidl-default-generators \
+      python3-colcon-common-extensions python3-yaml python3-pytest \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p ${BOONG_WS}/src \
+    && echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc \
+    && echo "[ -f ${BOONG_WS}/install/setup.bash ] && source ${BOONG_WS}/install/setup.bash" >> /root/.bashrc
+
+WORKDIR /root
+CMD ["sleep", "infinity"]

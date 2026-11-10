@@ -1,13 +1,7 @@
 // Mock robot control. Replace with rosbridge (/boong/orders topic, estop service) when the robot is wired up.
-import { INITIAL_ROBOT, type Ingredient, type Pause, type RobotAlertKind, type RobotState } from '../domain/robot'
+import { INITIAL_ROBOT, isRobotState, type Ingredient, type Pause, type RobotAlertKind, type RobotState } from '../domain/robot'
+import { ROBOT_KEY, pushRobot, remoteMode } from './remoteSync'
 import { readJson, writeJson } from './storage'
-
-const ROBOT_KEY = 'boong:robot'
-
-function isRobotState(value: unknown): value is RobotState {
-  const v = value as RobotState
-  return typeof v === 'object' && v !== null && typeof v.estop === 'boolean' && Array.isArray(v.pauses) && typeof v.refilledAt === 'object'
-}
 
 export function readRobot(): RobotState {
   const value = readJson<unknown>(ROBOT_KEY, null)
@@ -16,6 +10,7 @@ export function readRobot(): RobotState {
 
 function save(state: RobotState): RobotState {
   writeJson(ROBOT_KEY, state)
+  if (remoteMode()) pushRobot(state)
   return state
 }
 

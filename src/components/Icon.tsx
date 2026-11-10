@@ -1,7 +1,8 @@
-type IconName = 'reset' | 'home' | 'fish' | 'receipt' | 'back' | 'check' | 'plus' | 'minus'
+type IconName = 'mic' | 'reset' | 'home' | 'fish' | 'receipt' | 'back' | 'check' | 'plus' | 'minus'
 
 /** Line icons drawn on a 24px grid in currentColor, so they follow text color. */
 const PATHS: Record<IconName, string> = {
+  mic: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z M5.5 11.5a6.5 6.5 0 0 0 13 0 M12 18v3 M9 21h6',
   reset: 'M4.5 12a7.5 7.5 0 1 0 2.2-5.3 M4.5 4.5v4.2h4.2',
   home: 'M3.5 10.5 12 4l8.5 6.5 M5.5 9v10.5h4.5v-6h4v6h4.5V9',
   fish: 'M7 12c2.2-3.6 5-5.5 8-5.5 3.2 0 5.6 2.2 7 5.5-1.4 3.3-3.8 5.5-7 5.5-3 0-5.8-1.9-8-5.5Z M7 12 2.5 8v8L7 12Z M17.5 10.8h.01 M11.5 9.5c-.8 1.6-.8 3.4 0 5',

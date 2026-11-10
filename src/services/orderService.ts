@@ -1,11 +1,10 @@
 import { MENU, type Flavor } from '../domain/menu'
-import { cartTotal, toOrderItems, type AdminStatus, type Cart, type Order } from '../domain/order'
-import { INGREDIENTS, stockLeft } from '../domain/robot'
+import { buildOrder, toOrderItems, type AdminStatus, type Cart, type Order } from '../domain/order'
+import { findShortage, stockLeft } from '../domain/robot'
+import { newId } from './id'
+import { ORDERS_KEY, pushOrderPatch, remoteMode, requestOrder } from './remoteSync'
 import { readJson, writeJson } from './storage'
 import { readRobot } from './robotService'
-
-const ORDERS_KEY = 'boong:orders'
-const MEMO_MAX = 50
 
 function allOrders(): Order[] {
   const value = readJson<unknown>(ORDERS_KEY, [])
@@ -17,19 +16,19 @@ export function createOrder(userId: string, cart: Cart, memo: string, now: Date 
   if (items.length === 0) throw new Error('한 마리 이상 골라줘요')
   const orders = allOrders()
   const left = stockLeft(orders, readRobot().refilledAt, now)
-  const short = INGREDIENTS.find(({ key }) => items.reduce((sum, i) => sum + (key === 'batter' || i.flavor === key ? i.qty : 0), 0) > left[key])
+  const short = findShortage(items, left)
   if (short) throw new Error(`재료가 부족해요 (${short.name})`)
   const lastNumber = orders.reduce((max, o) => Math.max(max, o.number), 0)
-  const order: Order = {
-    id: crypto.randomUUID(),
-    number: lastNumber + 1,
-    userId,
-    items,
-    memo: memo.trim().slice(0, MEMO_MAX),
-    total: cartTotal(cart),
-    createdAt: now.toISOString(),
-  }
+  const order = buildOrder({ id: newId(), number: lastNumber + 1, userId, cart, memo, now })
   writeJson(ORDERS_KEY, [...orders, order])
+  return order
+}
+
+/** The customer flow: the local mock, or the server that numbers the order and sends it to the robot. */
+export async function placeOrder(userId: string, cart: Cart, memo: string): Promise<Order> {
+  if (!remoteMode()) return createOrder(userId, cart, memo)
+  const order = await requestOrder(userId, cart, memo)
+  writeJson(ORDERS_KEY, [...allOrders(), order])
   return order
 }
 
@@ -55,6 +54,7 @@ export function setOrderStatus(id: string, status: AdminStatus): Order {
   if (!target) throw new Error('주문을 찾을 수 없어요')
   const updated: Order = { ...target, manualStatus: status }
   writeJson(ORDERS_KEY, orders.map((o) => (o.id === id ? updated : o)))
+  if (remoteMode()) pushOrderPatch(id, { manualStatus: status })
   return updated
 }
 
@@ -86,5 +86,6 @@ export function restartOrder(id: string, now: Date = new Date()): Order {
   const { manualStatus: _cleared, ...rest } = target
   const updated: Order = { ...rest, timerStart: now.toISOString() }
   writeJson(ORDERS_KEY, orders.map((o) => (o.id === id ? updated : o)))
+  if (remoteMode()) pushOrderPatch(id, { manualStatus: null, timerStart: now.toISOString() })
   return updated
 }

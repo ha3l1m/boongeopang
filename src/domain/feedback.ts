@@ -25,6 +25,15 @@ export type Feedback = {
   createdAt: string
 }
 
+export function isFeedback(value: unknown): value is Feedback {
+  const v = value as Feedback
+  return (
+    typeof v === 'object' && v !== null &&
+    typeof v.orderId === 'string' && typeof v.userId === 'string' && typeof v.createdAt === 'string' &&
+    Array.isArray(v.flavors) && typeof v.scores === 'object' && v.scores !== null
+  )
+}
+
 /** What the sheet sends: filling is asked once per flavor in the order. */
 export type FeedbackInput = { doneness?: Score; crisp?: Score; filling?: Partial<Record<Flavor, Score>> }
 

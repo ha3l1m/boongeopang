@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { formatWon, menuItem } from '../domain/menu'
-import { STEP_LABEL, effectiveStatus, type AdminStatus, type OrderStatus } from '../domain/order'
+import { STEP_LABEL, effectiveStatus, type AdminStatus, type OrderRobot, type OrderStatus } from '../domain/order'
 import { isPaused } from '../domain/robot'
 import { readRobot } from '../services/robotService'
 import { getOrder } from '../services/orderService'
@@ -31,10 +31,12 @@ function sceneStep(status: AdminStatus): OrderStatus {
 }
 
 /** A short hint beside grandma's line; no countdown, so only states that need a word get one. */
-function hintText(status: AdminStatus, manual: boolean, paused: boolean): string {
+function hintText(status: AdminStatus, manual: boolean, paused: boolean, robot?: OrderRobot): string {
   if (status === 'cancelled') return '궁금한 건 매장에 물어봐 주세요'
   if (status === 'picked_up') return '픽업이 끝난 주문입니다'
   if (status === 'ready') return '번호표를 보여 주세요'
+  if (robot && Object.values(robot.sends).includes('failed')) return '매장에서 주문을 확인하고 있습니다'
+  if (robot?.queue) return `붕봇 대기 ${robot.queue}번째입니다`
   if (paused && !manual) return '붕봇이 잠깐 점검 중입니다'
   return manual ? '할매가 직접 챙기며 굽는 중입니다' : ''
 }
@@ -70,7 +72,7 @@ export function OrderStatusPage() {
   const cancelled = status === 'cancelled'
   const shown = preview?.step ?? sceneStep(status)
   const showStep = (step: OrderStatus) => setPreview((p) => ({ step, cue: (p?.cue ?? 0) + 1 }))
-  const hint = hintText(status, Boolean(order.manualStatus), isPaused(robot))
+  const hint = hintText(status, Boolean(order.manualStatus), isPaused(robot), order.robot)
   const pickup = shown === 'ready' && !cancelled
   const canRate = canGiveFeedback(order)
   const sheetOpen = canRate && (rateOpen || shouldAskFeedback(order, now))

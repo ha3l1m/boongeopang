@@ -88,10 +88,10 @@ flowchart LR
 RViz 처음 1회: `Add → By topic → /boong/scene` 추가.
 
 ### B. 실제 로봇 — 토(11/7)·월(11/9)
-1. 랜 케이블 연결, 노트북 유선 IP를 `192.168.137.50`으로 고정
+1. 랜 케이블 연결, 노트북 유선 IP를 `110.120.1.<다른 조와 겹치지 않는 번호>`로 고정 (게이트웨이 `110.120.1.1`, DNS `8.8.8.8`)
 2. 티치펜던트: 서보 ON, 원격 제어 허용, 저속
 3. `./robot.sh check` → 컨트롤러 IP 찾기 (라벨 IP와 다를 수 있음: 지난번 65 ↔ 64)
-4. `.env`: `ROBOT_MODE=real`, `ROBOT_HOST=<찾은 IP>` → `./robot.sh down && ./robot.sh up`
+4. `.env`: `ROBOT_MODE=real`, `ROBOT_HOST=110.120.1.64` → `./robot.sh down && ./robot.sh up`
 5. `./robot.sh bringup` → RViz 자세가 실제 로봇과 같은지 확인
 6. 비상정지 손에 쥐고 `./robot.sh test` (J6 ±10°)
 7. 동작 하나씩 좌표 티칭: `./robot.sh step pour_batter` → `add_filling` → `cover_filling` → `flip_mold` → `pick_to_bag`

@@ -7,7 +7,7 @@ services:
         DRCF_VER: ${DRCF_VER:-2}
     image: boong/dsr-humble:latest
     container_name: boong_dsr
-    # 로봇 컨트롤러(192.168.137.x)와 rosbridge(9090)에 바로 닿도록 호스트 네트워크 사용
+    # 로봇 컨트롤러(110.120.1.x)와 rosbridge(9090)에 바로 닿도록 호스트 네트워크 사용
     network_mode: host
     ipc: host
     env_file: .env

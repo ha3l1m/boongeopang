@@ -1,5 +1,5 @@
 import { MENU, type Flavor } from './menu'
-import type { AdminStatus, Order } from './order'
+import type { AdminStatus, Order, OrderItem } from './order'
 
 export type Ingredient = 'batter' | Flavor
 
@@ -38,6 +38,15 @@ export type RobotState = {
 }
 
 export const INITIAL_ROBOT: RobotState = { estop: false, pauses: [], refilledAt: {} }
+
+export function isRobotState(value: unknown): value is RobotState {
+  const v = value as RobotState
+  return typeof v === 'object' && v !== null && typeof v.estop === 'boolean' && Array.isArray(v.pauses) && typeof v.refilledAt === 'object'
+}
+
+export function findShortage(items: readonly OrderItem[], left: Record<Ingredient, number>): { name: string } | undefined {
+  return INGREDIENTS.find(({ key }) => items.reduce((sum, i) => sum + (key === 'batter' || i.flavor === key ? i.qty : 0), 0) > left[key])
+}
 
 export function isPaused(state: RobotState): boolean {
   return state.estop || Boolean(state.alert)

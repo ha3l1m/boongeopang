@@ -9,6 +9,8 @@ type CartValue = {
   remove: (flavor: Flavor) => void
   setMemo: (memo: string) => void
   clear: () => void
+  /** Replaces the cart, e.g. with what the customer said on the voice page. */
+  fill: (cart: Cart) => void
 }
 
 const CartContext = createContext<CartValue | null>(null)
@@ -24,6 +26,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       add: (flavor) => setCart((c) => addToCart(c, flavor)),
       remove: (flavor) => setCart((c) => removeFromCart(c, flavor)),
       setMemo,
+      fill: (next) => setCart(next),
       clear: () => {
         setCart({})
         setMemo('')

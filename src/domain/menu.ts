@@ -15,6 +15,9 @@ export const MENU: readonly MenuItem[] = [
   { flavor: 'choco', name: '초코붕', description: '진한 초코가 주르륵', price: 1200, color: '#5A3220', fillingName: '초코크림' },
 ]
 
+/** The robot has bottles for these only (ros2_ws motions.py FILLINGS). */
+export const ROBOT_FLAVORS: readonly Flavor[] = ['redbean', 'cream']
+
 export const MAX_PER_FLAVOR = 10
 export const MAX_TOTAL = 20
 

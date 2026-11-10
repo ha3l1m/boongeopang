@@ -1,6 +1,8 @@
 import { ALERT_LABEL, currentJob, type RobotState } from '../../domain/robot'
-import type { AdminStatus, Order } from '../../domain/order'
+import { menuItem } from '../../domain/menu'
+import { isTerminal, undelivered, type AdminStatus, type Order } from '../../domain/order'
 import { restartOrder, setOrderStatus } from '../../services/orderService'
+import { remoteMode, resendOrder } from '../../services/remoteSync'
 import { emergencyStop, resolveAlert, resumeRobot } from '../../services/robotService'
 import { runSafely, type Notify } from './runSafely'
 
@@ -25,6 +27,17 @@ export function RobotStrip({ robot, rows, ...notify }: Props) {
   const state = stateLabel(robot, current !== null)
   const alertOrder = robot.alert ? rows.find((r) => r.order.id === robot.alert?.orderId)?.order : undefined
   const run = (action: () => void) => runSafely(action, notify, FAIL)
+  const remote = remoteMode()
+  const undeliveredRows = rows.filter((r) => !isTerminal(r.status) && undelivered(r.order).length > 0)
+
+  const resend = async (id: string) => {
+    try {
+      await resendOrder(id)
+      notify.onChanged()
+    } catch (e) {
+      notify.onError(e instanceof Error ? e.message : FAIL)
+    }
+  }
 
   const stop = () => {
     if (window.confirm('붕봇을 비상 정지할까요? 모든 주문 진행이 멈춰요.')) run(() => emergencyStop())
@@ -52,12 +65,27 @@ export function RobotStrip({ robot, rows, ...notify }: Props) {
           {current ? <><strong>{no(current.number)}</strong> 굽는 중</> : '굽는 주문 없음'}
           <span className="muted"> · 대기 {waiting}건</span>
         </p>
-        {robot.estop ? (
+        {remote ? (
+          // No ROS stop service exists yet: a button here would claim a stop the robot never gets.
+          <p className="strip__note muted">비상 정지는 티치펜던트로</p>
+        ) : robot.estop ? (
           <button type="button" className="btn btn--primary strip__btn" onClick={() => run(() => resumeRobot())}>재개</button>
         ) : (
           <button type="button" className="btn robot__estop strip__btn" onClick={stop}>비상 정지</button>
         )}
       </div>
+
+      {undeliveredRows.map(({ order }) => (
+        <div key={order.id} className="robot__alert" role="alert">
+          <p>
+            <strong>{no(order.number)}</strong> {undelivered(order).map((i) => `${menuItem(i.flavor).name} ${i.qty}`).join(', ')} 전달 실패
+            {order.robot?.failed && <span className="muted"> · {order.robot.failed}</span>}
+          </p>
+          <div className="robot__alert-actions">
+            <button type="button" className="btn btn--primary" onClick={() => void resend(order.id)}>다시 보내기</button>
+          </div>
+        </div>
+      ))}
 
       {robot.alert && (
         <div className="robot__alert" role="alert">

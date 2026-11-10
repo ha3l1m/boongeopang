@@ -1,3 +1,4 @@
+import { newId } from './id'
 import { readJson, removeKey, writeJson } from './storage'
 
 export type User = { id: string; nickname: string }
@@ -21,7 +22,7 @@ export function currentUser(): User | null {
 
 export function loginAsGuest(): User {
   const prefix = NICK_PREFIXES[Math.floor(Math.random() * NICK_PREFIXES.length)]
-  const user: User = { id: crypto.randomUUID(), nickname: `${prefix} 손님` }
+  const user: User = { id: newId(), nickname: `${prefix} 손님` }
   writeJson(USER_KEY, user)
   return user
 }

@@ -30,6 +30,43 @@
         "--strictPort"
       ],
       "port": 5180
+    },
+    {
+      "name": "boong-server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "server"
+      ],
+      "port": 8787
+    },
+    {
+      "name": "boong-ros",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--host",
+        "--port",
+        "5179",
+        "--strictPort"
+      ],
+      "port": 5179
+    },
+    {
+      "name": "boong-https",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev:https",
+        "--",
+        "--port",
+        "5179",
+        "--strictPort"
+      ],
+      "port": 5179,
+      "url": "https://localhost:5179"
     }
   ]
 }

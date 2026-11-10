@@ -1,5 +1,8 @@
+import { useEffect } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './state/AuthContext'
+import { remoteMode, startSync } from './services/remoteSync'
+import { RobotLinkBanner } from './components/RobotLinkBanner'
 import { TabBar } from './components/TabBar'
 import { LoginPage, loginDestination } from './pages/LoginPage'
 import { MenuPage } from './pages/MenuPage'
@@ -7,6 +10,7 @@ import { VoiceOrderPage } from './pages/VoiceOrderPage'
 import { ConfirmPage } from './pages/ConfirmPage'
 import { OrderStatusPage } from './pages/OrderStatusPage'
 import { HistoryPage } from './pages/HistoryPage'
+import { VoicePage } from './pages/VoicePage'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminOrdersPage } from './pages/admin/AdminOrdersPage'
 import { isAdminLoggedIn } from './services/adminAuth'
@@ -37,8 +41,11 @@ function TabLayout() {
 
 export function App() {
   const isAdmin = useLocation().pathname.startsWith('/admin')
+  const remote = remoteMode()
+  useEffect(() => (remote ? startSync() : undefined), [remote])
   return (
     <div className={isAdmin ? 'app app--admin' : 'app'}>
+      {remote && <RobotLinkBanner />}
       <Routes>
         <Route path="/login" element={<LoginRoute />} />
         <Route element={<RequireAuth />}>
@@ -46,6 +53,7 @@ export function App() {
             <Route path="/" element={<MenuPage />} />
             <Route path="/orders" element={<HistoryPage />} />
           </Route>
+          <Route path="/voice" element={<VoicePage />} />
           <Route path="/confirm" element={<ConfirmPage />} />
           <Route path="/orders/:id" element={<OrderStatusPage />} />
         </Route>

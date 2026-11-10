@@ -32,11 +32,12 @@ class Scene:
         m.header.frame_id = self.frame
         m.header.stamp = self.node.get_clock().now().to_msg()
         m.ns, m.id, m.type, m.action = "boong", mid, shape, Marker.ADD
-        m.pose.position.x, m.pose.position.y, m.pose.position.z = xyz
+        # ROS 메시지 필드는 float만 받는다 (정수를 넣으면 AssertionError로 노드가 죽음)
+        m.pose.position.x, m.pose.position.y, m.pose.position.z = map(float, xyz)
         m.pose.orientation.w = 1.0
-        m.scale.x, m.scale.y, m.scale.z = scale
-        m.color.r, m.color.g, m.color.b = rgb
-        m.color.a = alpha
+        m.scale.x, m.scale.y, m.scale.z = map(float, scale)
+        m.color.r, m.color.g, m.color.b = map(float, rgb)
+        m.color.a = float(alpha)
         m.text = text
         return m
 

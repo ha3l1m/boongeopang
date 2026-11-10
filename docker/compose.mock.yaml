@@ -1,0 +1,16 @@
+# 사용: docker/ 폴더에서 ./robot.sh up-mock  (로봇·RTX 노트북 없이 Mac에서)
+# Docker Desktop은 host 네트워크가 기본으로 꺼져 있어 rosbridge 포트만 연다.
+services:
+  dsr:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    image: boong/mock-humble:latest
+    container_name: boong_dsr
+    env_file: .env
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../ros2_ws/src:/root/boong_ws/src
+    stdin_open: true
+    tty: true

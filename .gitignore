@@ -1,5 +1,7 @@
 node_modules
 dist
+dist-server
+.boong-data
 .DS_Store
 *.local
 docker/.env
