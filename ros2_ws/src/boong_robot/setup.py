@@ -18,6 +18,7 @@ setup(
     entry_points={
         "console_scripts": [
             "robot_action_server = boong_robot.robot_action_server:main",
+            "bungeoppang_bridge = boong_robot.bungeoppang_bridge:main",
             "order_manager = boong_robot.order_manager:main",
             "run_sequence = boong_robot.run_sequence:main",
         ],

@@ -9,7 +9,7 @@ import os
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import AnyLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -25,8 +25,12 @@ def generate_launch_description():
         DeclareLaunchArgument("backend", default_value="mock", description="dsr | mock"),
         DeclareLaunchArgument("poses_file", default_value=os.path.join(share, "config", "poses.yaml")),
         DeclareLaunchArgument("rosbridge", default_value="true"),
+        DeclareLaunchArgument("bungeoppang", default_value="false", description="true: bungeoppang2 bake_sequence 로 굽기 (robot_action_server 대신)"),
         Node(package="boong_robot", executable="robot_action_server", output="screen",
-             parameters=[{"backend": backend, "poses_file": poses}]),
+             parameters=[{"backend": backend, "poses_file": poses}],
+             condition=UnlessCondition(LaunchConfiguration("bungeoppang"))),
+        Node(package="boong_robot", executable="bungeoppang_bridge", output="screen",
+             condition=IfCondition(LaunchConfiguration("bungeoppang"))),
         Node(package="boong_robot", executable="order_manager", output="screen"),
         IncludeLaunchDescription(AnyLaunchDescriptionSource(rosbridge_xml),
                                  launch_arguments={"port": "9090"}.items(),
