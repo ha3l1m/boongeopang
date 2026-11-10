@@ -12,10 +12,6 @@ import { RobotStrip } from './RobotStrip'
 import { RobotDemo } from './RobotDemo'
 import { StockBars } from './StockBars'
 import { TodaySummary } from './TodaySummary'
-import { TuningCard } from './TuningCard'
-import { FeedbackList } from './FeedbackList'
-import { listFeedback } from '../../services/feedbackService'
-import { recommendations } from '../../services/tuningService'
 import { orderNo } from './orderFormat'
 
 const CONFIRM_TEXT: Partial<Record<AdminStatus, string>> = {
@@ -45,8 +41,6 @@ export function AdminOrdersPage() {
   const summary = summarizeDay(orders.map((o) => o.order), now)
   const notify = { onChanged: changed, onError: setError }
   const needsAttention = Boolean(robot.alert) || INGREDIENTS.some(({ key, capacity }) => stock[key] / capacity <= LOW_STOCK_RATIO)
-  const recs = recommendations(now)
-  const tuningPending = recs.some((r) => r.direction === 'up' || r.direction === 'down')
   const liveCount = orders.filter((o) => !isTerminal(o.status)).length
 
   const change = (order: Order, status: AdminStatus) => {
@@ -67,7 +61,7 @@ export function AdminOrdersPage() {
 
   return (
     <div className="admin-shell">
-      <AdminNav tab={tab} onTab={setTab} liveCount={liveCount} dots={{ today: needsAttention, feedback: tuningPending }} />
+      <AdminNav tab={tab} onTab={setTab} liveCount={liveCount} dots={{ today: needsAttention }} />
       <main className={`admin ${tab === 'live' || tab === 'done' ? 'admin--fill' : ''}`}>
         <header className="admin__header">
           {/* the side rail logo already names the page; keep the heading for screen readers only */}
@@ -85,19 +79,14 @@ export function AdminOrdersPage() {
 
         {error && <p role="alert" className="error">{error}</p>}
 
-        <div id="admin-tabpanel" role="tabpanel" aria-labelledby={`admin-tab-${tab}`} className={`admin__panel ${tab === 'feedback' ? 'admin__panel--split' : ''}`}>
+        <div id="admin-tabpanel" role="tabpanel" aria-labelledby={`admin-tab-${tab}`} className="admin__panel">
           {tab === 'today' ? (
             <>
               <TodaySummary summary={summary} />
               <div className="admin__control">
-                <StockBars stock={stock} {...notify} />
+                <StockBars stock={stock} />
                 <RobotDemo robot={robot} current={currentJob(orders).current} {...notify} />
               </div>
-            </>
-          ) : tab === 'feedback' ? (
-            <>
-              <TuningCard recs={recs} {...notify} />
-              <FeedbackList feedback={listFeedback()} />
             </>
           ) : (
             <OrdersBoard

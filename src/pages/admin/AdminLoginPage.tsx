@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { adminPinConfigured, checkAdminPin } from '../../services/adminAuth'
-import logo from '../../assets/logo-hoho.svg'
 
 const PIN_PATTERN = /^\d{4,8}$/
 
@@ -30,7 +29,6 @@ export function AdminLoginPage() {
       <div className="admin-login__body">
         <form className="admin-login__form" onSubmit={submit}>
           <div className="admin-login__brand">
-            <img src={logo} alt="호호붕어빵" />
             <h1>붕붕 주문판</h1>
           </div>
           {configured ? (

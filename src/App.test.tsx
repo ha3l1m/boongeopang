@@ -6,9 +6,8 @@ import { App } from './App'
 import { AuthProvider } from './state/AuthContext'
 import { CartProvider } from './state/CartContext'
 import { createOrder, getOrder, setOrderStatus } from './services/orderService'
-import { listFeedback, submitFeedback } from './services/feedbackService'
-import { readTuning } from './services/tuningService'
-import { FEEDBACK_DELAY_MS, MIN_SAMPLES } from './domain/feedback'
+import { listFeedback } from './services/feedbackService'
+import { FEEDBACK_DELAY_MS } from './domain/feedback'
 
 function renderApp(path = '/') {
   return render(
@@ -87,6 +86,7 @@ describe('admin', () => {
   it('redirects to admin login without session', () => {
     renderApp('/admin')
     expect(screen.getByRole('heading', { name: '붕붕 주문판' })).toBeInTheDocument()
+    expect(screen.queryByAltText('호호붕어빵')).not.toBeInTheDocument()
     expect(screen.queryByRole('region', { name: '오늘 요약' })).not.toBeInTheDocument()
   })
 
@@ -156,8 +156,9 @@ describe('admin tabs', () => {
     const user = userEvent.setup()
     renderApp('/admin')
     const tabs = screen.getAllByRole('tab')
-    expect(tabs.map((t) => t.textContent)).toEqual(['오늘 현황', '처리 중1', '완료', '고객 피드백'])
+    expect(tabs.map((t) => t.textContent)).toEqual(['오늘 현황', '처리 중1', '완료'])
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+    expect(screen.queryByAltText('호호붕어빵')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: '오늘 요약' })).toHaveTextContent('3마리')
     expect(screen.getByRole('region', { name: '재료 잔량' })).toBeInTheDocument()
     expect(screen.getByRole('region', { name: '이상 발생 데모' })).toBeInTheDocument()
@@ -266,48 +267,5 @@ describe('pickup feedback', () => {
     renderApp('/orders')
     await user.click(screen.getByRole('link', { name: '맛 평가 남기기' }))
     expect(screen.getByRole('dialog', { name: '붕어빵 어땠어요?' })).toBeInTheDocument()
-  })
-})
-
-describe('admin feedback list', () => {
-  it('splits a mixed order into one row per flavor with its own filling answer', async () => {
-    sessionStorage.setItem('boong:admin', '1')
-    const order = setOrderStatus(createOrder('u1', { cream: 1, choco: 1 }, '', new Date()).id, 'picked_up')
-    submitFeedback(order, { doneness: 0, filling: { cream: -1, choco: 0 } }, new Date())
-    const user = userEvent.setup()
-    renderApp('/admin')
-    await user.click(screen.getByRole('tab', { name: /^고객 피드백/ }))
-    const [cream, choco] = screen.getAllByRole('row').slice(1)
-    expect(cream).toHaveTextContent(/^슈붕.*딱 좋아요조금 적음—$/)
-    expect(choco).toHaveTextContent(/^초코붕딱 좋아요딱 좋아요—$/)
-    sessionStorage.removeItem('boong:admin')
-  })
-})
-
-describe('admin tuning card', () => {
-  it('recommends a shorter bake from feedback and applies it', async () => {
-    sessionStorage.setItem('boong:admin', '1')
-    for (let i = 0; i < MIN_SAMPLES; i++) {
-      const order = createOrder(`u${i}`, { redbean: 1 }, '', new Date())
-      submitFeedback(setOrderStatus(order.id, 'picked_up'), { doneness: 2 }, new Date())
-    }
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
-    const user = userEvent.setup()
-    renderApp('/admin')
-    expect(screen.queryByRole('region', { name: '피드백 보정' })).not.toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: /^고객 피드백/ })).toHaveAccessibleName(/확인 필요/)
-    await user.click(screen.getByRole('tab', { name: /^고객 피드백/ }))
-    expect(screen.getByRole('region', { name: '최근 피드백' })).toHaveTextContent(`${MIN_SAMPLES}건`)
-    expect(screen.getByRole('region', { name: '최근 피드백' })).toHaveTextContent('탔어요')
-    expect(screen.getByRole('columnheader', { name: '굽기 정도' })).toBeInTheDocument()
-    const card = screen.getByRole('region', { name: '피드백 보정' })
-    expect(card).toHaveTextContent('굽기 시간')
-    expect(card).toHaveTextContent('90초 → 85초')
-    expect(screen.getByRole('img', { name: new RegExp(`^굽기 시간 피드백 분포: .*탔어요 ${MIN_SAMPLES}건$`) })).toBeInTheDocument()
-    expect(card).toHaveTextContent('"탔어요" 쪽 의견이 가장 가운데에 있어서 5초 줄여요')
-    await user.click(screen.getByRole('button', { name: '굽기 시간 적용' }))
-    expect(readTuning().values.bakeSec).toBe(85)
-    expect(screen.queryByRole('button', { name: '굽기 시간 적용' })).not.toBeInTheDocument()
-    sessionStorage.removeItem('boong:admin')
   })
 })

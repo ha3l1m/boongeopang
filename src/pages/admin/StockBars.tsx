@@ -1,12 +1,8 @@
 import { INGREDIENTS, LOW_STOCK_RATIO, type Ingredient } from '../../domain/robot'
-import { refill } from '../../services/robotService'
-import { runSafely, type Notify } from './runSafely'
 
-type Props = Notify & { stock: Record<Ingredient, number> }
+type Props = { stock: Record<Ingredient, number> }
 
-export function StockBars({ stock, ...notify }: Props) {
-  const fill = (key: Ingredient) => runSafely(() => refill(key), notify, '재료를 채우지 못했어요')
-
+export function StockBars({ stock }: Props) {
   return (
     <section className="card stock" aria-label="재료 잔량">
       <h2>재료 잔량</h2>
@@ -29,9 +25,6 @@ export function StockBars({ stock, ...notify }: Props) {
                 <i style={{ width: `${ratio * 100}%` }} />
               </span>
               <span className="stock__qty">{left === 0 ? '품절' : `${left}/${capacity}`}</span>
-              <button type="button" className="chip stock__fill" disabled={left === capacity} onClick={() => fill(key)}>
-                채우기
-              </button>
             </li>
           )
         })}

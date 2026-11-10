@@ -1,20 +1,17 @@
 import type { ReactNode } from 'react'
-import logo from '../../assets/logo-hoho.svg'
 
-export type Tab = 'today' | 'live' | 'done' | 'feedback'
+export type Tab = 'today' | 'live' | 'done'
 
 const ICON: Record<Tab, ReactNode> = {
   today: <path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z" />,
   live: <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3" />,
   done: <path d="M5 4h14v16H5zM8.5 12l2.5 2.5 4.5-5" />,
-  feedback: <path d="M4 5h16v11H9l-5 4zM8 9h8M8 12h5" />,
 }
 
 const TABS: readonly { key: Tab; label: string }[] = [
   { key: 'today', label: '오늘 현황' },
   { key: 'live', label: '처리 중' },
   { key: 'done', label: '완료' },
-  { key: 'feedback', label: '고객 피드백' },
 ]
 
 type Props = {
@@ -28,7 +25,6 @@ type Props = {
 export function AdminNav({ tab, onTab, liveCount, dots }: Props) {
   return (
     <nav className="admin-nav" aria-label="주문판 메뉴">
-      <img className="admin-nav__brand" src={logo} alt="호호붕어빵" />
       <div className="admin-nav__list" role="tablist" aria-orientation="vertical">
         {TABS.map((t) => (
           <button
