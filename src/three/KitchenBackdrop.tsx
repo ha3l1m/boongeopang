@@ -1,7 +1,6 @@
-import { useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useMemo } from 'react'
 import { RoundedBox } from '@react-three/drei'
-import { DoubleSide, ExtrudeGeometry, Shape, type MeshStandardMaterial } from 'three'
+import { DoubleSide, ExtrudeGeometry, Shape } from 'three'
 import { Fish3D, fishOutline } from './Fish3D'
 
 const WALL = '#F2CFAE'
@@ -51,12 +50,8 @@ function ArchOven() {
   )
 }
 
-/** Hanging pendant lamp: cord, tan shade, warm bulb that gently breathes. */
+/** Hanging pendant lamp: cord, tan shade, warm bulb. */
 function Pendant({ x, z }: { x: number; z: number }) {
-  const bulb = useRef<MeshStandardMaterial>(null)
-  useFrame(({ clock }) => {
-    if (bulb.current) bulb.current.emissiveIntensity = 2.2 + Math.sin(clock.elapsedTime * 1.3 + x) * 0.25
-  })
   return (
     <group position={[x, 3.15, z]}>
       <mesh position={[0, 1.2, 0]}>
@@ -69,7 +64,7 @@ function Pendant({ x, z }: { x: number; z: number }) {
       </mesh>
       <mesh position={[0, -0.02, 0]}>
         <sphereGeometry args={[0.14, 24, 24]} />
-        <meshStandardMaterial ref={bulb} color="#FFF1C9" emissive="#FFC873" emissiveIntensity={2.2} />
+        <meshStandardMaterial color="#FFF1C9" emissive="#FFC873" emissiveIntensity={2.2} />
       </mesh>
       <pointLight position={[0, -0.25, 0]} color="#FFC07A" intensity={2.5} distance={4.5} />
     </group>

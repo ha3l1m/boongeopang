@@ -6,8 +6,6 @@ import { isPaused } from '../domain/robot'
 import { readRobot } from '../services/robotService'
 import { getOrder } from '../services/orderService'
 import { useAuth } from '../state/AuthContext'
-import { BongbotStage } from '../components/BongbotStage'
-import { GrandpaScene } from './GrandpaScene'
 import { ProgressSteps } from '../components/ProgressSteps'
 import { useNow, useToast } from '../components/hooks'
 import { FeedbackSheet } from '../components/FeedbackSheet'
@@ -124,15 +122,7 @@ export function OrderStatusPage() {
           <ProgressSteps status={shown} onSelect={showStep} />
         </section>
       )}
-      <div className={`halo status__scene ${pickup ? 'status__scene--pickup' : ''}`}>
-        {pickup ? (
-          <figure className="stage status__grandpa" style={{ height: 350 }}>
-            <figcaption className="sr-only">할아버지가 따끈한 붕어빵 봉투를 들고 신나게 걸어가요</figcaption>
-            <GrandpaScene />
-          </figure>
-        ) : (
-          <BongbotStage mode={cancelled && !preview ? 'idle' : shown} height={400} cue={preview?.cue ?? 0} />
-        )}
+      <div className={`status__scene ${pickup ? 'status__scene--pickup' : ''}`}>
         <p className={`status__subtitle ${pickup ? 'status__subtitle--top' : ''}`} aria-live="polite">
           <strong>{HALMAE_LINE[preview ? preview.step : status]}</strong>
           {!preview && hint && <span>{hint}</span>}

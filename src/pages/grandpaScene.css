@@ -2,47 +2,18 @@
    backdrop and floor shadows never move. Steam drifts up from the bag on its own 4.2s loop. */
 .grandpa { overflow: hidden; }
 
-.grandpa__sway { transform-origin: 580px 1150px; animation: grandpa-sway 1.4s infinite; }
-@keyframes grandpa-sway {
-  0%, 50%, 100% { transform: rotate(0); animation-timing-function: ease-out; }
-  20% { transform: rotate(2.2deg); animation-timing-function: ease-in-out; }
-  70% { transform: rotate(-2.2deg); animation-timing-function: ease-in-out; }
-}
+.grandpa__sway { transform-origin: 580px 1150px;  }
 
 .grandpa__shoe { transform-box: fill-box; transform-origin: 50% 100%; }
-.grandpa__shoe--l { animation: grandpa-shoe-l 1.4s infinite; }
-.grandpa__shoe--r { animation: grandpa-shoe-l 1.4s -0.7s infinite; }
-@keyframes grandpa-shoe-l {
-  0% { transform: translateY(0); animation-timing-function: ease-out; }
-  20% { transform: translateY(-48px) rotate(-6deg); animation-timing-function: ease-in; }
-  40%, 100% { transform: translateY(0); }
-}
 
 /* Contact shadow under each shoe; it shrinks and fades while that shoe is up. */
 .grandpa__shadow { fill: #6B4220; opacity: 0.55; filter: url(#grandpa-shadow-blur); transform-box: fill-box; transform-origin: center; }
-.grandpa__shadow--l { animation: grandpa-shadow 1.4s infinite; }
-.grandpa__shadow--r { animation: grandpa-shadow 1.4s -0.7s infinite; }
-@keyframes grandpa-shadow {
-  0%, 40%, 100% { opacity: 0.55; transform: scale(1); }
-  20% { opacity: 0.35; transform: scale(0.82); }
-}
 
 /* Little puff of floor dust each time a shoe lands. */
 .grandpa__dust { fill: #E9C48A; opacity: 0; transform-box: fill-box; transform-origin: center; }
-.grandpa__dust--l { animation: grandpa-dust 1.4s infinite; }
-.grandpa__dust--r { animation: grandpa-dust 1.4s -0.7s infinite; }
-@keyframes grandpa-dust {
-  0%, 38% { opacity: 0; transform: scale(0.5); }
-  42% { opacity: 0.7; }
-  60%, 100% { opacity: 0; transform: scale(1.35); }
-}
 
 .grandpa__steam {
   fill: none; stroke: #FFFDF7; stroke-width: 24; stroke-linecap: round; opacity: 0;
-  transform-box: fill-box; transform-origin: 50% 100%; animation: grandpa-steam 4.2s ease-out infinite;
+  transform-box: fill-box; transform-origin: 50% 100%;
 }
-@keyframes grandpa-steam {
-  0% { opacity: 0; transform: translateY(20px) scale(0.6, 0.5); }
-  25% { opacity: 0.8; }
-  100% { opacity: 0; transform: translateY(-85px) scale(1.15, 1); }
-}
+

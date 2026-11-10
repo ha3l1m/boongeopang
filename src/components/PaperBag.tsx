@@ -8,7 +8,7 @@ export function PaperBag({ count, size = 56 }: Props) {
     <div className="bag" style={{ width: size, height: size }} aria-hidden="true">
       <div className="bag__peeks">
         {Array.from({ length: peeks }, (_, i) => (
-          <span key={`${count}-${i}`} className="bag__fish" style={{ animationDelay: `${i * 60}ms` }}>
+          <span key={`${count}-${i}`} className="bag__fish">
             <FishBread size={size * 0.55} />
           </span>
         ))}

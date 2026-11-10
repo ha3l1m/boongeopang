@@ -1,7 +1,5 @@
-import { useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import { ContactShadows, Line, RoundedBox, Sparkles } from '@react-three/drei'
-import type { Group } from 'three'
 import { Fish3D } from './models'
 import { Grandma } from './Grandma'
 
@@ -63,14 +61,8 @@ function Roof() {
 }
 
 function Bulbs() {
-  const group = useRef<Group>(null)
-  useFrame(({ clock }) => {
-    group.current?.children.forEach((bulb, i) => {
-      bulb.rotation.z = Math.sin(clock.elapsedTime * 1.6 + i) * 0.08
-    })
-  })
   return (
-    <group ref={group}>
+    <group>
       {[-1.0, -0.34, 0.34, 1.0].map((x) => (
         <group key={x} position={[x, 2.58, 0.86]}>
           <mesh position={[0, -0.14, 0]}>
@@ -106,7 +98,7 @@ function Mold() {
           </group>
         )
       })}
-      <Sparkles count={10} scale={[0.6, 0.8, 0.6]} position={[0, 0.45, 0]} size={4} speed={0.5} color="#ffffff" opacity={0.7} />
+      <Sparkles count={10} scale={[0.6, 0.8, 0.6]} position={[0, 0.45, 0]} size={4} speed={0} color="#ffffff" opacity={0.7} />
     </group>
   )
 }
@@ -354,12 +346,8 @@ function StreetLamp() {
 }
 
 function Scene() {
-  const rig = useRef<Group>(null)
-  useFrame(({ clock }) => {
-    if (rig.current) rig.current.rotation.y = -0.35 + Math.sin(clock.elapsedTime * 0.4) * 0.12
-  })
   return (
-    <group ref={rig}>
+    <group rotation={[0, -0.35, 0]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <circleGeometry args={[30, 64]} />
         <meshStandardMaterial color={GROUND} roughness={1} />
@@ -390,7 +378,7 @@ export default function CartScene() {
       <LanternString />
       <StreetLamp />
       <Scene />
-      <Sparkles count={110} scale={[9, 7, 5]} position={[0, 3.2, 0]} size={3.5} speed={0.25} color="#FFFFFF" opacity={0.95} />
+      <Sparkles count={110} scale={[9, 7, 5]} position={[0, 3.2, 0]} size={3.5} speed={0} color="#FFFFFF" opacity={0.95} />
     </Canvas>
   )
 }

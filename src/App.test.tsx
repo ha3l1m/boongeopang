@@ -30,9 +30,9 @@ describe('ordering flow', () => {
 
   it('shows the stamping factory splash without design tabs', () => {
     const { container } = renderApp('/login')
-    expect(container.querySelector('.factory image[href="/art/factory/plate.webp"]')).toBeInTheDocument()
-    expect(container.querySelectorAll('.factory__fish')).toHaveLength(4)
-    expect(screen.getByRole('img', { name: '호호붕어빵' }).getAttribute('src')).toContain('logo-hoho-factory')
+    expect(container.querySelector('.factory image[href="/art/factory/plate.webp"]')).not.toBeInTheDocument()
+    expect(container.querySelectorAll('.factory__fish')).toHaveLength(0)
+    expect(screen.getByRole('heading', { name: '호호붕어빵' })).toBeInTheDocument()
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '붕어빵 주문' })).toBeInTheDocument()
   })

@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useEffect, useMemo } from 'react'
 import { useGLTF } from '@react-three/drei'
-import { MathUtils, type Mesh, type Object3D } from 'three'
-import { PACK, type GrandmaAction } from './sceneMode'
+import { type Mesh, type Object3D } from 'three'
+import type { GrandmaAction } from './sceneMode'
 import { applyClayLook } from './clayTextures'
 
 /** Built by tools/blender/build_halmae.py. Pivot nodes are posed in code below. */
@@ -13,23 +12,17 @@ type Pose = { left: ArmPose; right: ArmPose; headX: number }
 
 const REST: ArmPose = { x: 0, z: 0.15 }
 
-function poseFor(action: GrandmaAction, t: number, since: number): Pose {
+/** Still poses: each action's end state (for pack, the fish has already been lowered into the bag). */
+function poseFor(action: GrandmaAction): Pose {
   switch (action) {
     case 'wave':
-      return { left: REST, right: { x: 0, z: 2.5 + Math.sin(t * 7) * 0.35 }, headX: 0 }
-    case 'present': {
-      const bob = Math.sin(t * 3) * 0.15
-      return { left: { x: -0.35, z: -(1.85 + bob) }, right: { x: -0.35, z: 1.85 - bob }, headX: 0.03 }
-    }
+      return { left: REST, right: { x: 0, z: 2.5 }, headX: 0 }
+    case 'present':
+      return { left: { x: -0.35, z: -1.85 }, right: { x: -0.35, z: 1.85 }, headX: 0.03 }
     case 'cheer':
-      return { left: { x: 0, z: -2.4 - Math.sin(t * 6) * 0.25 }, right: { x: 0, z: 2.4 + Math.sin(t * 6) * 0.25 }, headX: -0.1 }
-    case 'pack': {
-      const p = t - since
-      const reach = p < PACK.hold ? -1.35 : p < PACK.drop ? MathUtils.lerp(-1.35, -0.7, (p - PACK.hold) / (PACK.drop - PACK.hold)) : -0.5
-      const pat = p > PACK.drop ? Math.abs(Math.sin(t * 6)) * 0.15 : 0
-      const arm = { x: reach + pat, z: 0.35 }
-      return { left: { x: arm.x, z: -arm.z }, right: arm, headX: p < PACK.drop ? 0.35 : 0.15 }
-    }
+      return { left: { x: 0, z: -2.4 }, right: { x: 0, z: 2.4 }, headX: -0.1 }
+    case 'pack':
+      return { left: { x: -0.5, z: -0.35 }, right: { x: -0.5, z: 0.35 }, headX: 0.15 }
     default:
       return { left: REST, right: REST, headX: 0.05 }
   }
@@ -80,8 +73,6 @@ export function Grandma({ action, expression }: { action: GrandmaAction; express
     return scene.clone(true)
   }, [scene])
   const rig = useMemo(() => findRig(model), [model])
-  const started = useRef({ action, since: -1 })
-
   useEffect(() => {
     model.traverse((node) => {
       if ((node as Mesh).isMesh) {
@@ -91,25 +82,17 @@ export function Grandma({ action, expression }: { action: GrandmaAction; express
     })
   }, [model])
 
-  useFrame(({ clock }, delta) => {
-    const t = clock.elapsedTime
-    if (started.current.action !== action || started.current.since < 0) started.current = { action, since: t }
-    const pose = poseFor(action, t, started.current.since)
-    const { head, body, armL, armR, face } = rig
-    armL.rotation.x = MathUtils.damp(armL.rotation.x, pose.left.x, 6, delta)
-    armL.rotation.z = MathUtils.damp(armL.rotation.z, -Math.abs(pose.left.z), 6, delta)
-    armR.rotation.x = MathUtils.damp(armR.rotation.x, pose.right.x, 6, delta)
-    armR.rotation.z = MathUtils.damp(armR.rotation.z, Math.abs(pose.right.z), 6, delta)
-    const shake = action === 'present' ? Math.sin(t * 1.2) * 0.25 : action === 'wave' ? Math.sin(t * 2) * 0.12 : 0
-    const nod = action === 'present' ? Math.sin(t * 2.4) * 0.06 : 0
-    head.rotation.x = MathUtils.damp(head.rotation.x, pose.headX + nod, 4, delta)
-    head.rotation.y = MathUtils.damp(head.rotation.y, shake, 4, delta)
-    head.rotation.z = Math.sin(t * 1.1) * (action === 'present' ? 0.12 : 0.05)
-    body.scale.y = 1 + Math.sin(t * 2) * 0.015
+  useEffect(() => {
+    const pose = poseFor(action)
+    const { head, armL, armR, face } = rig
+    armL.rotation.x = pose.left.x
+    armL.rotation.z = -Math.abs(pose.left.z)
+    armR.rotation.x = pose.right.x
+    armR.rotation.z = Math.abs(pose.right.z)
+    head.rotation.set(pose.headX, 0, 0)
     const shown = EXPRESSIONS[expression ?? ACTION_EXPRESSION[action]]
     for (const part of FACE_PARTS) face[part].visible = shown.includes(part)
-    face.EyesOpen.scale.y = Math.sin(t * 0.9 + 1) > 0.985 ? 0.15 : 1
-  })
+  }, [rig, action, expression])
 
   return <primitive object={model} />
 }

@@ -57,12 +57,12 @@ describe('BongbotScene', () => {
     const { container } = render(<BongbotScene mode="packed" cue={0} />)
     const layers = [...container.querySelectorAll('.bongbot__packing image')].map((image) => image.getAttribute('href'))
     expect(layers).toEqual([
-      ...Array(3).fill('/art/fish.webp'),
-      '/art/fish.webp',
+      ...Array(3).fill('/art/fish.png'),
+      '/art/fish.png',
       '/art/bongbot/packed-front.webp',
       '/art/bongbot/packed-fingers.webp',
     ])
-    expect(container.querySelector('.bongbot__drop-fish image')?.getAttribute('href')).toBe('/art/fish.webp')
+    expect(container.querySelector('.bongbot__drop-fish image')?.getAttribute('href')).toBe('/art/fish.png')
     // Outside the overlay, so reduced motion still shows the held fish and the pile.
     expect(container.querySelector('.bongbot__overlay .bongbot__drop-fish')).toBeNull()
   })

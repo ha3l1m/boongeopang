@@ -1,7 +1,4 @@
-import { useRef, type MutableRefObject } from 'react'
-import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
-import type { Group } from 'three'
 
 export type BottleKind = 'batter' | 'filling'
 
@@ -48,17 +45,10 @@ export function Bottle({ liquid }: { liquid: string }) {
   )
 }
 
-/** Rounded tan tray holding the batter and filling bottles; the one the arm is holding leaves its seat. */
-export function BottleCaddy({ filling, held }: { filling: string; held: MutableRefObject<BottleKind | null> }) {
-  const batter = useRef<Group>(null)
-  const fill = useRef<Group>(null)
+/** Rounded tan tray holding the batter and filling bottles, both in their seats (nothing is held in the still scene). */
+export function BottleCaddy({ filling }: { filling: string }) {
   const dx = BOTTLE_SPOT.filling[0] - BOTTLE_SPOT.batter[0]
   const dz = BOTTLE_SPOT.filling[2] - BOTTLE_SPOT.batter[2]
-
-  useFrame(() => {
-    if (batter.current) batter.current.visible = held.current !== 'batter'
-    if (fill.current) fill.current.visible = held.current !== 'filling'
-  })
 
   return (
     <group>
@@ -70,10 +60,10 @@ export function BottleCaddy({ filling, held }: { filling: string; held: MutableR
           <meshStandardMaterial color="#C48E5E" roughness={0.9} />
         </RoundedBox>
       </group>
-      <group ref={batter} position={BOTTLE_SPOT.batter}>
+      <group position={BOTTLE_SPOT.batter}>
         <Bottle liquid={BATTER} />
       </group>
-      <group ref={fill} position={BOTTLE_SPOT.filling}>
+      <group position={BOTTLE_SPOT.filling}>
         <Bottle liquid={filling} />
       </group>
     </group>

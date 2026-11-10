@@ -44,19 +44,15 @@ export function MenuPage() {
       </header>
 
       <ul className="menu__list">
-        {MENU.map((item, index) => {
+        {MENU.map((item) => {
           const qty = cart[item.flavor] ?? 0
           const soldOut = available(item.flavor) <= 0
           return (
             <li key={item.flavor} className={`card menu__item ${qty > 0 ? 'menu__item--on' : ''} ${soldOut ? 'menu__item--soldout' : ''}`}>
-              <MenuFish name={item.name} filling={item.color} qty={qty} phase={index * 1.7} />
+              <MenuFish name={item.name} filling={item.color} qty={qty} />
               <div className="menu__info">
                 <div className="menu__head">
                   <h3>{item.name}{soldOut && <span className="chip chip--cancel menu__soldout">품절</span>}</h3>
-                  <span className="filling-tag">
-                    <i className="filling-tag__swatch" style={{ background: item.color }} aria-hidden="true" />
-                    {item.fillingName}
-                  </span>
                 </div>
                 <p className="muted">{item.description}</p>
                 <div className="menu__foot">

@@ -20,7 +20,7 @@
 /* The scene fills the whole screen; title and button float over it. */
 .login__scene { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
 .login__sign { position: relative; z-index: 1; }
-.login__sign { display: grid; gap: 8px; justify-items: center; animation: rise 520ms var(--ease-out) both; }
+.login__sign { display: grid; gap: 8px; justify-items: center;  }
 .login__title { margin: 0; line-height: 0; }
 .login__logo { width: min(76vw, 310px); height: auto; filter: drop-shadow(0 0 16px rgba(255, 170, 70, 0.4)); }
 .login__cta {
@@ -50,7 +50,7 @@
   /* the render's floor shadow runs to its bottom edge; fade the last strip (below the shoes) into the backdrop */
   -webkit-mask-image: linear-gradient(180deg, #000 91%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 91%, transparent 100%);
-  animation: rise 700ms 80ms var(--ease-out) both;
+
 }
 .login__grandpa {
   /* Box follows the image's own ratio so the edge fade lands on the image's edges, hiding its opaque backdrop. */
@@ -61,29 +61,24 @@
   mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 3.5%, #000 95%, transparent 100%);
   mask-composite: intersect;
 }
-/* Stamping factory splash (FactoryScene.tsx); the backdrop follows the illustration's brown so its edges fade away. */
-.login--factory { background: linear-gradient(180deg, #804A35 0%, #91533D 24%, #AA664E 66%, #C07C64 100%); }
+/* Stamping factory splash (FactoryScene.tsx) on black. */
+.login--factory { background: #000; }
 .login--factory .login__logo { filter: drop-shadow(0 4px 12px rgba(46, 22, 8, 0.4)); }
-.login--factory .login__note { color: #FFF3DC; text-shadow: 0 1px 3px rgba(46, 22, 8, 0.55); }
+.login--factory .login__note { color: #FFFFFF; text-shadow: none; }
 
 /* Menu */
 .menu__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .menu__item {
   display: flex; align-items: center; gap: 12px; padding: 18px 14px 18px 14px;
-  border: 1.5px solid transparent; transition: border-color 200ms ease, transform 200ms var(--ease-out), box-shadow 200ms ease;
-  animation: rise 480ms var(--ease-out) both;
+  border: 1.5px solid transparent;
+
 }
-.menu__item:nth-child(2) { animation-delay: 60ms; }
-.menu__item:nth-child(3) { animation-delay: 120ms; }
-.menu__item:nth-child(4) { animation-delay: 180ms; }
 .menu__item:active { transform: scale(0.985); }
-.menu__item--on { border-color: var(--gold); box-shadow: 0 4px 20px rgba(255, 154, 31, 0.16); }
+.menu__item--on { border-color: var(--gold); box-shadow: 0 4px 20px rgba(49, 130, 246, 0.16); }
 .menu__fish { flex: none; align-self: flex-start; width: 84px; height: 84px; border-radius: 16px; background: var(--butter); overflow: hidden;
   margin: 0; display: grid; place-items: center; }
-.menu__fish-hop { display: block; animation: menu-fish-hop 460ms var(--ease-spring); }
-.menu__fish-img { display: block; animation: bob 3.2s ease-in-out infinite; filter: drop-shadow(0 4px 4px rgba(122, 74, 28, 0.18)); }
-@keyframes menu-fish-hop { 40% { transform: translateY(-10px) rotate(-6deg) scale(1.06); } }
-@media (prefers-reduced-motion: reduce) { .menu__fish-hop, .menu__fish-img { animation: none; } }
+.menu__fish-hop { display: block;  }
+.menu__fish-img { display: block;  filter: drop-shadow(0 4px 4px rgba(122, 74, 28, 0.18)); }
 .menu__info { flex: 1; min-width: 0; word-break: keep-all; }
 .menu__info h3 { font-size: 18px; white-space: nowrap; }
 .menu__info .muted { margin-top: 4px; font-size: 14px; line-height: 1.4; }
@@ -92,7 +87,6 @@
 .menu__head .filling-tag__swatch { width: 14px; height: 14px; }
 .menu__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
 .menu__price { font-weight: 700; font-size: 17px; color: var(--ink); }
-
 
 /* Confirm */
 .receipt { background: var(--white); padding: 20px; margin: 8px 0 12px; border-radius: var(--r-card); box-shadow: var(--clay-shadow); }
@@ -108,7 +102,7 @@
 .confirm__field { display: grid; gap: 8px; margin-bottom: 12px; }
 .confirm__field textarea {
   font: inherit; color: var(--ink); border: 1.5px solid transparent; border-radius: 14px; padding: 12px 14px;
-  background: var(--bg); resize: none; transition: border-color 160ms ease, background 160ms ease;
+  background: var(--bg); resize: none;
 }
 .confirm__field textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
 .confirm__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -129,7 +123,7 @@
 .ticket {
   margin: 4px 0 0; padding: 14px 18px 14px; background: var(--white);
   border: 1.5px solid var(--line); border-radius: 18px;
-  animation: rise 480ms var(--ease-out) both;
+
 }
 .ticket__top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1.5px dashed var(--line); }
 .ticket__id { display: grid; }
@@ -138,7 +132,9 @@
 .ticket__total { flex: none; font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums; padding-bottom: 3px; }
 .ticket__items { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .ticket__memo { margin-top: 8px; }
-.status__scene { position: relative; margin-top: 16px; }
+/* Status scene sits on a black stage so the subtitle reads like a film caption. */
+.status__scene { position: relative; margin-top: 16px; background: #000; border-radius: 24px; overflow: hidden; min-height: 150px; }
+.status__scene.halo::before { display: none; }
 /* Pickup reuses the splash grandpa; pin it inside the scene box instead of the splash's full-screen layout. */
 .status__grandpa { display: flex; justify-content: center; }
 .status__grandpa .login__hug { position: static; width: auto; height: 100%; max-width: 100%; }
@@ -154,12 +150,11 @@
 .status__subtitle {
   position: absolute; left: 12px; right: 12px; bottom: 14px; margin: 0 auto; z-index: 2;
   width: fit-content; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
-  padding: 10px 16px; border-radius: 16px; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(25, 31, 40, 0.1); font-size: 14px; text-align: center; word-break: keep-all; text-wrap: balance;
-  animation: rise 420ms var(--ease-out) both;
+  padding: 10px 16px; border-radius: 16px; background: rgba(0, 0, 0, 0.78); color: #FFFFFF;
+  font-size: 14px; text-align: center; word-break: keep-all; text-wrap: balance;
 }
 .status__subtitle strong { font-weight: 700; }
-.status__subtitle span { color: var(--ink-soft); font-size: 13px; }
+.status__subtitle span { color: #C9D1DA; font-size: 13px; }
 .status__preview {
   display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
   margin: 8px 0 4px; font-weight: 600; color: var(--gold-deep); font-size: 14px;
@@ -168,10 +163,7 @@
 
 /* History */
 .history { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
-.history > li { animation: rise 480ms var(--ease-out) both; }
-.history > li:nth-child(2) { animation-delay: 50ms; }
-.history > li:nth-child(3) { animation-delay: 100ms; }
-.history__item { display: grid; gap: 6px; color: inherit; text-decoration: none; border: 1.5px solid transparent; transition: transform 180ms var(--ease-out); }
+.history__item { display: grid; gap: 6px; color: inherit; text-decoration: none; border: 1.5px solid transparent;  }
 .history__item:active { transform: scale(0.985); }
 .history__item--live { border-color: var(--gold); }
 .history__top, .history__bottom { display: flex; justify-content: space-between; align-items: center; }
@@ -190,7 +182,6 @@
 .menu__item--soldout { opacity: 0.6; }
 .menu__soldout { margin-left: 8px; font-size: 12px; vertical-align: middle; font-family: var(--font-body); }
 
-
 /* Bottom order panel (kiosk style): totals + actions row, then the picked list. */
 .page--order { padding-bottom: calc(var(--tab-h) + 170px); }
 .orderpanel {
@@ -206,22 +197,12 @@
 .orderpanel__totals dd { margin: 0; color: var(--gold-deep); font-weight: 800; font-size: 17px; font-variant-numeric: tabular-nums; }
 .orderpanel__reset {
   width: 48px; height: 48px; border: none; border-radius: 14px; background: var(--bg); color: var(--ink-soft);
-  display: grid; place-items: center; transition: transform 140ms var(--ease-out), background 140ms ease;
+  display: grid; place-items: center;
 }
 .orderpanel__reset:active { transform: scale(0.92); background: var(--paper-deep); }
 .orderpanel__reset:disabled { opacity: 0.45; }
 .orderpanel__cta { min-height: 48px; padding: 12px 18px; border-radius: 14px; white-space: nowrap; }
 .orderpanel__cta--idle { opacity: 0.45; }
-.orderpanel__list { display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 10px 20px; }
-.orderpanel__empty { color: var(--ink-soft); font-size: 15px; font-weight: 600; }
-.orderpanel__items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.orderpanel__item {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px 6px 6px; border-radius: var(--r-pill);
-  background: var(--bg); font-size: 14px; font-weight: 600; animation: pop-in 260ms var(--ease-spring) both;
-}
-.orderpanel__item .filling-tag__swatch { width: 16px; height: 16px; }
-.orderpanel__item strong { color: var(--gold-deep); font-variant-numeric: tabular-nums; }
-@keyframes pop-in { from { opacity: 0; transform: scale(0.85); } }
 
 /* rate-later entry points (feedback after eating) */
 .rate-cta { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -234,3 +215,38 @@
   font-size: 14px; font-weight: 700; text-decoration: none;
 }
 .history__rate:active { background: var(--paper-deep); }
+
+/* Voice order (VoiceOrderPage.tsx) */
+.voice { display: flex; flex-direction: column; gap: 16px; padding-bottom: 32px; }
+.voice__mic { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 8px; }
+.voice__button {
+  width: 132px; height: 132px; border: none; border-radius: 50%; display: grid; place-items: center;
+  color: var(--white); background: linear-gradient(180deg, #3B8BF7 0%, #1B64DA 100%);
+  box-shadow: 0 10px 30px rgba(49, 130, 246, 0.35);
+}
+.voice__button:disabled { opacity: 0.4; }
+.voice__button--on { box-shadow: 0 0 0 10px rgba(49, 130, 246, 0.2), 0 10px 30px rgba(49, 130, 246, 0.35); }
+.voice__hint { font-size: 15px; color: var(--ink-soft); text-align: center; }
+.voice__tools { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.voice__chip { border: none; border-radius: 999px; padding: 8px 14px; background: var(--bg); color: var(--ink-soft); font-size: 13px; font-weight: 600; }
+.voice__log {
+  list-style: none; margin: 0; padding: 14px 16px; min-height: 96px; border-radius: 16px;
+  background: var(--ink); color: var(--white); font-size: 14px; display: grid; gap: 6px;
+}
+.voice__empty { color: #8B95A1; }
+.voice__count { font-size: 14px; font-weight: 600; color: var(--ink-soft); text-align: center; }
+.voice__actions { margin-top: auto; display: grid; grid-template-columns: 1.2fr 2fr; gap: 10px; }
+.voice__actions .btn { white-space: nowrap; }
+
+/* Splash buttons side by side: 음성 주문 narrow on the left, 붕어빵 주문 wide on the right. */
+.login--factory .login__cta { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.login--factory .login__cta .login__note { grid-column: 1 / -1; }
+.voice__typed { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.voice__typed input { font: inherit; font-size: 15px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--white); color: var(--ink); min-width: 0; }
+.voice__typed input:focus { outline: none; border-color: var(--gold); }
+.voice__typed .btn { white-space: nowrap; }
+.voice__cart { display: grid; gap: 8px; justify-items: center; }
+.voice__items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.voice__items li { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: var(--bg); font-weight: 700; font-size: 15px; }
+/* Splash wordmark: plain text in Inter, no logo image. */
+.login__wordmark { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 800; font-size: 44px; line-height: 1.2; letter-spacing: -0.02em; color: #FFFFFF; }
