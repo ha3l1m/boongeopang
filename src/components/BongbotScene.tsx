@@ -46,7 +46,7 @@ const LAMPS = [
 function Ambient() {
   return (
     <g className="bongbot__ambient">
-      {LAMPS.map((lamp, i) => (
+      {LAMPS.map((lamp) => (
         <circle
           key={lamp.x}
           cx={lamp.x}
@@ -54,7 +54,6 @@ function Ambient() {
           r={lamp.r}
           fill="url(#bongbot-glow)"
           className="bongbot__lamp"
-          style={{ animationDelay: `${i * -1.1}s` }}
         />
       ))}
       <ellipse cx="1418" cy="246" rx="120" ry="95" fill="url(#bongbot-glow)" className="bongbot__sign" />
@@ -136,7 +135,7 @@ function FillingPour() {
       />
       <g clipPath="url(#bongbot-below-nozzle)">
         {[0, 1, 2].map((i) => (
-          <g key={i} className="bongbot__falling-bean" style={{ animationDelay: `${0.3 + i * 0.3}s` }}>
+          <g key={i} className="bongbot__falling-bean">
             <ellipse rx="12" ry="14" fill="url(#bongbot-bean)" />
             <ellipse cx="-4" cy="-5" rx="3" ry="5" fill="#FFE4DC" opacity="0.6" />
           </g>
@@ -150,11 +149,10 @@ function FillingPour() {
 function Steam({ wisps, className = '' }: { wisps: { x: number; y: number }[]; className?: string }) {
   return (
     <g filter="url(#bongbot-steam-blur)" className={className}>
-      {wisps.map((w, i) => (
+      {wisps.map((w) => (
         <path
           key={`${w.x}-${w.y}`}
           className="bongbot__steam"
-          style={{ animationDelay: `${i * -0.9}s` }}
           d={`M${w.x} ${w.y} c-18 -24 18 -44 0 -68 s18 -44 0 -68`}
         />
       ))}
@@ -208,7 +206,7 @@ function BakeSequence() {
   )
 }
 
-/** The app's fish (public/art/fish.webp, 360x253) placed in the close-up packing shot, centred on (x, y). */
+/** The app's fish (public/art/fish.png, 360x253) placed in the close-up packing shot, centred on (x, y). */
 const FISH_W = 360
 const FISH_H = 253
 const fishAt = (x: number, y: number, deg: number, scale: number) =>
@@ -227,12 +225,12 @@ function Packing() {
     <g className="bongbot__packing">
       <g className="bongbot__bag-pile">
         {PILE.map((transform) => (
-          <image key={transform} href="/art/fish.webp" width={FISH_W} height={FISH_H} transform={transform} />
+          <image key={transform} href="/art/fish.png" width={FISH_W} height={FISH_H} transform={transform} />
         ))}
       </g>
       <g className="bongbot__drop-fish">
         <g className="bongbot__swing">
-          <image href="/art/fish.webp" width={FISH_W} height={FISH_H} transform={HELD_FISH} />
+          <image href="/art/fish.png" width={FISH_W} height={FISH_H} transform={HELD_FISH} />
         </g>
       </g>
       <image href="/art/bongbot/packed-front.webp" x="380" y="460" width="780" height="564" />
@@ -243,7 +241,6 @@ function Packing() {
             key={i}
             d={star(700 + i * 90, 540 - (i % 2) * 30, 22)}
             className="bongbot__pop"
-            style={{ animationDelay: `${3.15 + i * 0.08}s` }}
           />
         ))}
       </g>
@@ -297,7 +294,6 @@ function Pouch() {
             key={i}
             d={star(s.x, s.y, s.r)}
             className="bongbot__twinkle"
-            style={{ animationDelay: `${i * -0.37}s` }}
           />
         ))}
         <Steam
@@ -341,14 +337,13 @@ function Received() {
           className="bongbot__warm-cavity"
         />
       ))}
-      {BOLTS.map((b, i) => (
+      {BOLTS.map((b) => (
         <circle
           key={b.x}
           cx={b.x}
           cy={b.y}
           r="11"
           className="bongbot__led"
-          style={{ animationDelay: `${i * 0.25}s` }}
         />
       ))}
     </g>

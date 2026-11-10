@@ -1,14 +1,21 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './state/AuthContext'
 import { TabBar } from './components/TabBar'
-import { LoginPage } from './pages/LoginPage'
+import { LoginPage, loginDestination } from './pages/LoginPage'
 import { MenuPage } from './pages/MenuPage'
+import { VoiceOrderPage } from './pages/VoiceOrderPage'
 import { ConfirmPage } from './pages/ConfirmPage'
 import { OrderStatusPage } from './pages/OrderStatusPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminOrdersPage } from './pages/admin/AdminOrdersPage'
 import { isAdminLoggedIn } from './services/adminAuth'
+
+/** After signing in, go to the page the splash button asked for (passed in location state), default the menu. */
+function LoginRoute() {
+  const { user } = useAuth()
+  return user ? <Navigate to={loginDestination()} replace /> : <LoginPage />
+}
 
 function RequireAuth() {
   const { user } = useAuth()
@@ -29,12 +36,11 @@ function TabLayout() {
 }
 
 export function App() {
-  const { user } = useAuth()
   const isAdmin = useLocation().pathname.startsWith('/admin')
   return (
     <div className={isAdmin ? 'app app--admin' : 'app'}>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
+        <Route path="/login" element={<LoginRoute />} />
         <Route element={<RequireAuth />}>
           <Route element={<TabLayout />}>
             <Route path="/" element={<MenuPage />} />
@@ -43,6 +49,7 @@ export function App() {
           <Route path="/confirm" element={<ConfirmPage />} />
           <Route path="/orders/:id" element={<OrderStatusPage />} />
         </Route>
+        <Route path="/voice" element={<VoiceOrderPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route element={<RequireAdmin />}>
           <Route path="/admin" element={<AdminOrdersPage />} />

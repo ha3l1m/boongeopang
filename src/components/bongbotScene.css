@@ -1,71 +1,34 @@
 /* Robot-kitchen illustration (BongbotScene.tsx). Steps are 8s long in a live order, so every one-shot animation
    finishes inside 8s; the ambient glows loop forever. */
 .bongbot { display: block; width: 100%; height: 100%; }
-
-.bongbot__pan, .bongbot__zoom { transition: transform 900ms cubic-bezier(0.4, 0, 0.2, 1); }
 /* Filling is a close-up of the mold: both cavities (around x 1005, y 690 in the art) fill the view at 1.9x. */
 .bongbot__zoom { transform-box: view-box; transform-origin: 0 0; }
 .bongbot--filling .bongbot__zoom { transform: translate(768px, 512px) scale(1.9) translate(-1005px, -690px); }
 
-.bongbot__frame { opacity: 0; transition: opacity 700ms ease; }
+.bongbot__frame { opacity: 0;  }
 .bongbot__frame.is-on { opacity: 1; }
 
 /* Warm bulbs, sign and oven breathe gently. */
 .bongbot__lamp, .bongbot__sign, .bongbot__oven { mix-blend-mode: screen; }
-.bongbot__lamp { animation: bongbot-breathe 2.4s ease-in-out infinite; }
-.bongbot__sign { animation: bongbot-sign 3.6s ease-in-out infinite; }
-.bongbot__oven { animation: bongbot-oven 1.7s ease-in-out infinite; }
-@keyframes bongbot-breathe {
-  0%, 100% { opacity: 0.25; }
-  50% { opacity: 0.6; }
-}
-@keyframes bongbot-sign {
-  0%, 100% { opacity: 0.2; }
-  45% { opacity: 0.55; }
-  50% { opacity: 0.3; }
-  55% { opacity: 0.55; }
-}
-@keyframes bongbot-oven {
-  0%, 100% { opacity: 0.25; }
-  30% { opacity: 0.45; }
-  60% { opacity: 0.3; }
-}
 
 /* Batter / filling spread: black ellipses in the mask grow from the landing point and uncover the poured frame. */
 .bongbot__spread { fill: #000; transform-box: fill-box; transform-origin: 30% 50%; transform: scale(0); }
-.bongbot__spread--a { animation: bongbot-spread 3.3s 0.3s cubic-bezier(0.3, 0.6, 0.4, 1) forwards; }
-.bongbot__spread--b { animation: bongbot-spread 3.3s 3.9s cubic-bezier(0.3, 0.6, 0.4, 1) forwards; transform-origin: 40% 50%; }
-@keyframes bongbot-spread {
-  from { transform: scale(0.05); }
-  to { transform: scale(1); }
-}
+.bongbot__spread--b {  transform-origin: 40% 50%; }
 
 /* Highlight running down the batter stream. */
 .bongbot__flow {
   fill: none; stroke: #FFFBEA; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 14 34; opacity: 0.6;
-  animation: bongbot-flow 0.6s linear infinite;
+
 }
-@keyframes bongbot-flow { to { stroke-dashoffset: -48; } }
 
 .bongbot__ripple {
   fill: none; stroke: #FFF6D8; stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center;
-  animation: bongbot-ripple 1.2s ease-out 0.3s 3;
-}
-.bongbot__ripple--late { animation-delay: 0.9s; }
-@keyframes bongbot-ripple {
-  0% { opacity: 0; transform: scale(0.2); }
-  25% { opacity: 0.8; }
-  100% { opacity: 0; transform: scale(1.4); }
+
 }
 
 .bongbot__steam {
   fill: none; stroke: #FFF8EC; stroke-width: 9; stroke-linecap: round; opacity: 0;
-  animation: bongbot-steam 2.7s ease-out infinite;
-}
-@keyframes bongbot-steam {
-  0% { opacity: 0; transform: translateY(20px); }
-  30% { opacity: 0.7; }
-  100% { opacity: 0; transform: translateY(-70px); }
+
 }
 
 /* Baking (8s), the storyboard images as drawn, stacked over the stage: open 0-0.9s, closing 0.9-1.4s, closed 1.4-5.2s
@@ -73,9 +36,6 @@
 .bongbot__bake-layer { position: absolute; inset: 0; overflow: hidden; container-type: size; }
 .bongbot__bake { position: absolute; inset: 0; opacity: 0; }
 .bongbot__bake--open { opacity: 1; }
-.bongbot__bake--closing { animation: bongbot-cut-in 0.12s 0.9s ease-out forwards; }
-.bongbot__bake--closed { animation: bongbot-cut-in 0.1s 1.4s ease-out forwards; }
-.bongbot__bake--baked { animation: bongbot-fade-in 0.45s 5.2s ease forwards; }
 /* Square shots cover the stage, centred: whichever stage side is longer sets the size. */
 .bongbot__bake-shot { position: absolute; left: 50%; top: 50%; width: max(100cqw, 100cqh); aspect-ratio: 1; translate: -50% -50%; }
 /* Opened: the golden fish (around 63% down the shot) move to the centre, a little closer; the lid top may crop. */
@@ -83,108 +43,42 @@
 .bongbot__bake-shot img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .bongbot__bake--closed .bongbot__bake-shot {
   transform-origin: 50% 90%;
-  animation: bongbot-thump 0.35s 1.4s ease-out, bongbot-sizzle 0.16s 2s linear 18;
+
 }
 /* The pan's own pixels, brightened and pulsing, so it reads as heating without repainting the image. */
-.bongbot__pan-glow { filter: brightness(1.3) saturate(1.15); animation: bongbot-pan-flicker 1.4s ease-in-out infinite; }
-@keyframes bongbot-pan-flicker {
-  0%, 100% { opacity: 0.9; }
-  40% { opacity: 0.35; }
-  60% { opacity: 0.7; }
-}
-@keyframes bongbot-cut-in { to { opacity: 1; } }
-@keyframes bongbot-thump {
-  0% { transform: scale(1.03) translateY(-8px); }
-  45% { transform: scale(0.99) translateY(3px); }
-  100% { transform: none; }
-}
-@keyframes bongbot-sizzle {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-1.5px); }
-  75% { transform: translateX(1.5px); }
-}
-@keyframes bongbot-fade-in { to { opacity: 1; } }
+.bongbot__pan-glow { filter: brightness(1.3) saturate(1.15);  }
 
 /* Packing (8s, close-up): the held fish wiggles in the gripper, drops into the pouch at 2.6s, the fish already in there
    jostle as it lands and sparkles pop over the opening. */
-.bongbot__swing { transform-box: view-box; transform-origin: 790px 330px; animation: bongbot-swing 1.2s ease-in-out 2; }
-@keyframes bongbot-swing {
-  0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(3deg); }
-  75% { transform: rotate(-3deg); }
-}
+.bongbot__swing { transform-box: view-box; transform-origin: 790px 330px;  }
+
 .bongbot__drop-fish {
   transform-box: view-box;
   transform-origin: 842px 398px;
-  animation: bongbot-drop-fish 0.55s 2.6s cubic-bezier(0.5, 0, 0.9, 0.5) forwards;
-}
-@keyframes bongbot-drop-fish { to { transform: translate(-50px, 175px) rotate(-22deg); } }
-.bongbot__bag-pile { animation: bongbot-jostle 0.4s 3.15s ease-out; }
-@keyframes bongbot-jostle {
-  40% { transform: translateY(10px); }
-  75% { transform: translateY(-4px); }
-}
-.bongbot__pop { fill: #FFE7A6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: bongbot-pop 0.7s ease-out forwards; }
-@keyframes bongbot-pop {
-  0% { opacity: 0; transform: scale(0.2) translateY(0); }
-  30% { opacity: 1; }
-  100% { opacity: 0; transform: scale(1.2) translateY(-40px); }
+
 }
 
+.bongbot__pop { fill: #FFE7A6; opacity: 0; transform-box: fill-box; transform-origin: center;  }
+
 /* Ready: sparkles twinkle round the pouch. */
-.bongbot__twinkle { fill: #FFE7A6; transform-box: fill-box; transform-origin: center; animation: bongbot-twinkle 1.8s ease-in-out infinite; }
-@keyframes bongbot-twinkle {
-  0%, 100% { opacity: 0.1; transform: scale(0.5) rotate(0); }
-  50% { opacity: 1; transform: scale(1.1) rotate(20deg); }
-}
+.bongbot__twinkle { fill: #FFE7A6; transform-box: fill-box; transform-origin: center;  }
 
 /* Filling: each bean pile swells up from where the paste lands (left cavity 0.6-3.6s, right 3.9-7.2s). A pile
    squashes wide first and gains height later, like paste heaping up. */
 .bongbot__pile { transform-box: view-box; transform: scale(0); }
-/* Starts once the first falling bean reaches the batter. */
-.bongbot__pile--0 { animation: bongbot-pile 3s 0.6s cubic-bezier(0.3, 0.6, 0.4, 1) forwards; }
-.bongbot__pile--1 { animation: bongbot-pile 3.3s 3.9s cubic-bezier(0.3, 0.6, 0.4, 1) forwards; }
 /* The bean column rises from the left mound (2.0s) and meets the nozzle as the mound finishes (3.6s). */
-.bongbot__column-reveal { transform-box: view-box; animation: bongbot-column 1.6s 2s ease-in-out forwards; }
-@keyframes bongbot-column { to { transform: translateY(-92px); } }
+.bongbot__column-reveal { transform-box: view-box;  }
+
 /* Single beans drop out of the nozzle tip onto the left mound until the column has joined up (0.3-3.6s). */
-.bongbot__falling-bean { transform-box: view-box; transform-origin: 0 0; opacity: 0; animation: bongbot-bean-fall 0.9s ease-in 4; }
-@keyframes bongbot-bean-fall {
-  0% { opacity: 1; transform: translate(834px, 622px) scale(0.6) rotate(-20deg); }
-  75% { opacity: 1; transform: translate(850px, 704px) scale(1) rotate(10deg); }
-  100% { opacity: 0; transform: translate(852px, 712px) scale(0.9) rotate(15deg); }
-}
-@keyframes bongbot-pile {
-  0% { transform: scale(0.08, 0.04); }
-  40% { transform: scale(0.6, 0.4); }
-  100% { transform: scale(1); }
-}
+.bongbot__falling-bean { transform-box: view-box; transform-origin: 0 0; opacity: 0;  }
 
 /* Received: power-up. Status bolts blink, then the burner and cavities warm up over ~2s and keep a slow pulse. */
-.bongbot__led { fill: #FFD25A; mix-blend-mode: screen; opacity: 0; animation: bongbot-led 1.2s ease-in-out infinite; }
-@keyframes bongbot-led {
-  0%, 100% { opacity: 0.1; }
-  40% { opacity: 0.95; }
-  60% { opacity: 0.3; }
-}
+.bongbot__led { fill: #FFD25A; mix-blend-mode: screen; opacity: 0;  }
+
 .bongbot__warm-burner, .bongbot__warm-cavity { mix-blend-mode: screen; opacity: 0; }
-.bongbot__warm-burner { animation: bongbot-warm-up 2s 0.3s ease-in forwards, bongbot-warm-pulse 1.6s 2.3s ease-in-out infinite; }
-.bongbot__warm-cavity { animation: bongbot-warm-up 2.4s 0.8s ease-in forwards, bongbot-warm-pulse 2s 3.2s ease-in-out infinite; }
-@keyframes bongbot-warm-up {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes bongbot-warm-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
 
 /* Motion off: plain step frames, no spreading or glows. */
 @media (prefers-reduced-motion: reduce) {
   .bongbot__overlay, .bongbot__ambient { display: none; }
-  .bongbot__swing, .bongbot__drop-fish, .bongbot__bag-pile { animation: none; }
-  .bongbot__frame, .bongbot__pan, .bongbot__zoom { transition: none; }
-  /* Still: the opened mold with the golden fish. */
-  .bongbot__bake, .bongbot__bake-shot, .bongbot__pan-glow { animation: none; }
   .bongbot__bake--baked { opacity: 1; }
 }

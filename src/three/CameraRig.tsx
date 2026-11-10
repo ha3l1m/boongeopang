@@ -1,7 +1,6 @@
-import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { Vector3 } from 'three'
-import { watchingCaddy } from './pourTimeline'
+import { useEffect } from 'react'
+import { useThree } from '@react-three/fiber'
+import { SETTLED_ELAPSED, watchingCaddy } from './pourTimeline'
 import { BAKE_SPIN, type SceneMode } from './sceneMode'
 
 type Shot = { pos: [number, number, number]; look: [number, number, number] }
@@ -36,23 +35,15 @@ function shotFor(mode: SceneMode, elapsed: number): Shot {
   }
 }
 
-export function CameraRig({ mode, cue, offsetY }: { mode: SceneMode; cue: number; offsetY: number }) {
-  const look = useRef(new Vector3(...SHOTS.wide.look).setY(SHOTS.wide.look[1] + offsetY))
-  const started = useRef({ mode, cue, since: -1 })
-  const goal = useRef(new Vector3())
-  const goalLook = useRef(new Vector3())
+/** Still camera: placed once on the settled shot for the mode, no easing between shots. */
+export function CameraRig({ mode, offsetY }: { mode: SceneMode; cue: number; offsetY: number }) {
+  const camera = useThree((state) => state.camera)
+  const shot = shotFor(mode, SETTLED_ELAPSED)
 
-  useFrame(({ camera, clock }, delta) => {
-    const t = clock.elapsedTime
-    const s = started.current
-    if (s.mode !== mode || s.cue !== cue || s.since < 0) started.current = { mode, cue, since: t }
-    const shot = shotFor(mode, t - started.current.since)
-    const k = 1 - Math.exp(-2.6 * delta)
-    goal.current.set(shot.pos[0], shot.pos[1] + offsetY, shot.pos[2])
-    goalLook.current.set(shot.look[0], shot.look[1] + offsetY, shot.look[2])
-    camera.position.lerp(goal.current, k)
-    look.current.lerp(goalLook.current, k)
-    camera.lookAt(look.current)
-  })
+  useEffect(() => {
+    camera.position.set(shot.pos[0], shot.pos[1] + offsetY, shot.pos[2])
+    camera.lookAt(shot.look[0], shot.look[1] + offsetY, shot.look[2])
+  }, [camera, shot, offsetY])
+
   return null
 }

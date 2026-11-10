@@ -41,7 +41,7 @@
 .app--admin .btn {
   font-family: var(--a-font); font-size: 15px; font-weight: 600;
   border-radius: var(--a-radius-sm); padding: 12px 16px; min-height: 44px;
-  box-shadow: none; transition: background-color 120ms ease, transform 120ms ease;
+  box-shadow: none;
 }
 .app--admin .btn:active { transform: scale(0.97); box-shadow: none; }
 .app--admin .btn:focus-visible, .app--admin select:focus-visible, .app--admin .chip:focus-visible {
@@ -90,11 +90,8 @@
 .robot__state { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; flex-shrink: 0; }
 .robot__state i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 .robot__state--run { background: var(--a-green-soft); color: var(--a-green); }
-.robot__state--run i { animation: robot-blink 1.2s ease-in-out infinite; }
 .robot__state--idle { background: var(--a-fill); color: var(--a-sub); }
 .robot__state--alert, .robot__state--stop { background: var(--a-red-soft); color: var(--a-red); }
-@keyframes robot-blink { 50% { opacity: 0.3; } }
-@media (prefers-reduced-motion: reduce) { .robot__state--run i { animation: none; } }
 
 .app--admin .robot__estop { background: var(--a-red); color: #fff; }
 .app--admin .robot__estop:hover { background: var(--a-red-press); }
@@ -273,7 +270,7 @@
 .stock__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .stock__row { display: grid; grid-template-columns: 64px 1fr 56px auto; align-items: center; gap: 12px; font-size: 14px; color: var(--a-sub); }
 .stock__bar { height: 8px; border-radius: 999px; background: var(--a-fill); overflow: hidden; }
-.stock__bar i { display: block; height: 100%; border-radius: inherit; background: var(--a-blue); transition: width 300ms ease; }
+.stock__bar i { display: block; height: 100%; border-radius: inherit; background: var(--a-blue);  }
 .stock__row--low .stock__bar i { background: var(--a-orange); }
 .stock__row--low .stock__qty { color: var(--a-orange); font-weight: 600; }
 .stock__row--out .stock__qty { color: var(--a-red); font-weight: 700; }

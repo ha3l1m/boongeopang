@@ -1,5 +1,5 @@
 :root {
-  /* Toss-clean neutrals with 붕어빵 orange as the single accent. Legacy names kept so components stay stable. */
+  /* Toss-clean neutrals with blue as the single primary accent. Legacy names kept so components stay stable. */
   --white: #ffffff;
   --bg: #f2f4f6;
   /* Warm beige page so white cards read without shadows. */
@@ -7,9 +7,9 @@
   --cream: #f9fafb;
   --butter: #fff3e0;
   --sky: #ffffff;
-  --gold: #ff9a1f;
-  --gold-deep: #f08400;
-  --crust: #f08400;
+  --gold: #3182f6;
+  --gold-deep: #1b64da;
+  --crust: #1b64da;
   --ink: #191f28;
   --ink-soft: #6b7684;
   --ink-faint: #8b95a1;

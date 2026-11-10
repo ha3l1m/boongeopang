@@ -1,14 +1,12 @@
-import { useMemo, useRef, type MutableRefObject } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useEffect, useMemo, type MutableRefObject } from 'react'
 import { RoundedBox } from '@react-three/drei'
-import { ExtrudeGeometry, MathUtils, type Group } from 'three'
+import { ExtrudeGeometry } from 'three'
 import { fishOutline } from './Fish3D'
 import { solveArm, type ArmAngles } from './armIk'
-import { BATTER, BOTTLE_SPOT, Bottle, NOZZLE_REACH, type BottleKind } from './BottleCaddy'
+import { BOTTLE_SPOT, NOZZLE_REACH, type BottleKind } from './BottleCaddy'
 import { POUR_POINTS, POUR_TOP } from './MoldRig'
-import { armTarget, bottleFlip, holdingBottle, POUR_TIMELINE, type ArmTarget } from './pourTimeline'
+import { armTarget, SETTLED_ELAPSED, type ArmTarget } from './pourTimeline'
 import type { SceneMode } from './sceneMode'
-import { useStepClock } from './useStepClock'
 
 type Pose = ArmAngles & { headTilt: number }
 
@@ -65,7 +63,6 @@ function goalPose(mode: SceneMode, elapsed: number): Pose {
   return kind ? POUR_POSES[kind][armTarget(elapsed)] : POSES[mode as keyof typeof POSES]
 }
 
-const ease = 6
 const CREAM = '#F4DDB8'
 const BROWN = '#7A4A2E'
 const DECAL = '#F0A020'
@@ -157,10 +154,9 @@ function Base() {
 }
 
 const FINGER_OPEN = 0.2
-const FINGER_CLOSED = 0.135
 
 /** Claw gripper hanging from the wrist: palm, bolted bridge, two fingers with brown pads. */
-function Gripper({ fingers, bottle, liquid }: { fingers: MutableRefObject<Group | null>; bottle: MutableRefObject<Group | null>; liquid: string }) {
+function Gripper() {
   return (
     <group>
       <Joint radius={0.12} depth={0.24} />
@@ -183,7 +179,7 @@ function Gripper({ fingers, bottle, liquid }: { fingers: MutableRefObject<Group 
           </mesh>
         ))}
       </group>
-      <group ref={fingers}>
+      <group>
         {[-1, 1].map((side) => (
           <group key={side} position={[side * FINGER_OPEN, -0.22, 0]}>
             <RoundedBox args={[0.07, 0.26, 0.17]} radius={0.03} smoothness={3} position={[0, -0.13, 0]} castShadow>
@@ -195,70 +191,39 @@ function Gripper({ fingers, bottle, liquid }: { fingers: MutableRefObject<Group 
           </group>
         ))}
       </group>
-      <group ref={bottle} position={[0, -GRIP_Y, 0]} visible={false}>
-        <Bottle liquid={liquid} />
-      </group>
     </group>
   )
 }
 
 type Props = { mode: SceneMode; cue: number; filling: string; held: MutableRefObject<BottleKind | null> }
 
-export function Bongbot({ mode, cue, filling, held }: Props) {
+/** Still robot: the arm sits in its end pose for the current step, and no bottle is in the gripper. */
+export function Bongbot({ mode, held }: Props) {
   const fish = useDecalFish()
-  const yaw = useRef<Group>(null)
-  const shoulder = useRef<Group>(null)
-  const elbow = useRef<Group>(null)
-  const head = useRef<Group>(null)
-  const fingers = useRef<Group>(null)
-  const bottle = useRef<Group>(null)
-  const clock = useStepClock(mode, cue)
-  const kind = bottleFor(mode)
+  const pose = goalPose(mode, SETTLED_ELAPSED)
+  const upright = -(pose.shoulder + pose.elbow)
 
-  useFrame(({ clock: { elapsedTime: t } }, delta) => {
-    if (!yaw.current || !shoulder.current || !elbow.current || !head.current) return
-    const elapsed = clock.current.elapsed
-    const pose = goalPose(mode, elapsed)
-    const sway = mode === 'idle' ? Math.sin(t * 1.2) * 0.08 : 0
-    const wave = mode === 'received' || mode === 'ready' ? Math.sin(t * 6) * 0.35 : 0
-    yaw.current.rotation.y = MathUtils.damp(yaw.current.rotation.y, pose.yaw, ease, delta)
-    shoulder.current.rotation.z = MathUtils.damp(shoulder.current.rotation.z, pose.shoulder + sway, ease, delta)
-    elbow.current.rotation.z = MathUtils.damp(elbow.current.rotation.z, pose.elbow + wave, ease, delta)
-    const upright = -(shoulder.current.rotation.z + elbow.current.rotation.z)
-    const nod = kind ? 0 : mode === 'ordering' ? Math.sin(t * 7) * 0.25 : Math.sin(t * 1.6) * 0.05
-    head.current.rotation.z = upright + pose.headTilt
-    head.current.rotation.x = nod
-
-    const holding = kind !== null && holdingBottle(elapsed)
-    held.current = holding ? kind : null
-    const closed = holding || (kind !== null && elapsed >= POUR_TIMELINE.grip - 0.15 && elapsed < POUR_TIMELINE.release)
-    fingers.current?.children.forEach((finger, i) => {
-      const side = i === 0 ? -1 : 1
-      finger.position.x = MathUtils.damp(finger.position.x, side * (closed ? FINGER_CLOSED : FINGER_OPEN), 12, delta)
-    })
-    if (bottle.current) {
-      bottle.current.visible = holding
-      bottle.current.rotation.z = bottleFlip(elapsed) * Math.PI
-    }
-  })
+  useEffect(() => {
+    held.current = null
+  }, [held, mode])
 
   return (
     <group position={BASE}>
       <Base />
-      <group ref={yaw} position={[0, 0.22, 0]}>
+      <group rotation={[0, pose.yaw, 0]} position={[0, 0.22, 0]}>
         <mesh position={[0, 0.1, 0]} castShadow>
           <cylinderGeometry args={[0.2, 0.24, 0.2, 40]} />
           <meshStandardMaterial color={CREAM} {...clay} />
         </mesh>
-        <group ref={shoulder} position={[0, SHOULDER_Y - 0.22, 0]}>
+        <group position={[0, SHOULDER_Y - 0.22, 0]} rotation={[0, 0, pose.shoulder]}>
           <Joint radius={0.22} depth={0.42} />
           <Link length={UPPER_ARM} width={0.32} fish={fish} />
-          <group ref={elbow} position={[0, UPPER_ARM, 0]}>
+          <group position={[0, UPPER_ARM, 0]} rotation={[0, 0, pose.elbow]}>
             <Joint radius={0.19} depth={0.38} />
             <Link length={FOREARM} width={0.25} />
             <Band y={FOREARM - 0.22} radius={0.13} />
-            <group ref={head} position={[0, FOREARM, 0]}>
-              <Gripper fingers={fingers} bottle={bottle} liquid={kind === 'filling' ? filling : BATTER} />
+            <group position={[0, FOREARM, 0]} rotation={[0, 0, upright + pose.headTilt]}>
+              <Gripper />
             </group>
           </group>
         </group>

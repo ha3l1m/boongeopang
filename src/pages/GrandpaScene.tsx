@@ -52,7 +52,6 @@ export function GrandpaScene() {
             <path
               key={wisp.x}
               className="grandpa__steam"
-              style={{ animationDelay: `${wisp.delay}s` }}
               d={`M${wisp.x} ${wisp.y} c-22 -28 22 -50 0 -78 s22 -50 0 -78`}
             />
           ))}

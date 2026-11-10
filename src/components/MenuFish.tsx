@@ -1,8 +1,8 @@
 import { useId } from 'react'
 
-type Props = { name: string; filling: string; qty: number; phase: number }
+type Props = { name: string; filling: string; qty: number }
 
-/** public/art/fish.webp is 360x253; the bite is taken from the lips, stopping short of the eye at (76, 123). */
+/** public/art/fish.png is 360x253; the bite is taken from the lips, stopping short of the eye at (76, 123). */
 const FISH_W = 360
 const FISH_H = 253
 const BITE = { cx: -2, cy: 152, r: 68 }
@@ -14,7 +14,7 @@ function toothAt(deg: number) {
 }
 
 /** Clay taiyaki with a bite out of its head showing the filling; bobs in its tile and hops on every pick. */
-export function MenuFish({ name, filling, qty, phase }: Props) {
+export function MenuFish({ name, filling, qty }: Props) {
   const id = useId()
   return (
     <figure className="menu__fish">
@@ -26,11 +26,10 @@ export function MenuFish({ name, filling, qty, phase }: Props) {
           width={68}
           height={48}
           aria-hidden="true"
-          style={{ animationDelay: `${-phase}s` }}
         >
           <defs>
             <mask id={`${id}-body`} maskUnits="userSpaceOnUse" style={{ maskType: 'alpha' }}>
-              <image href="/art/fish.webp" width={FISH_W} height={FISH_H} />
+              <image href="/art/fish.png" width={FISH_W} height={FISH_H} />
             </mask>
             <mask id={`${id}-bite`} maskUnits="userSpaceOnUse">
               <rect width={FISH_W} height={FISH_H} fill="white" />
@@ -51,7 +50,7 @@ export function MenuFish({ name, filling, qty, phase }: Props) {
             <circle cx={BITE.cx + 4} cy={BITE.cy} r={BITE.r - 14} fill={filling} />
             <ellipse cx={BITE.cx + 18} cy={BITE.cy - 14} rx={10} ry={6} fill="white" opacity={0.35} />
           </g>
-          <image href="/art/fish.webp" width={FISH_W} height={FISH_H} mask={`url(#${id}-bite)`} />
+          <image href="/art/fish.png" width={FISH_W} height={FISH_H} mask={`url(#${id}-bite)`} />
         </svg>
       </span>
     </figure>

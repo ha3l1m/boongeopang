@@ -65,3 +65,9 @@ export function bottleFlip(elapsed: number): number {
 export function watchingCaddy(elapsed: number): boolean {
   return elapsed < POUR_TIMELINE.carry || elapsed >= POUR_TIMELINE.back + 0.2
 }
+
+/**
+ * Still scenes: no clock runs. Every 3D scene shows the end state of its step, which is the moment after the whole
+ * pour routine has finished (so the bottle is back in the caddy, the mold is full, and the bake is done).
+ */
+export const SETTLED_ELAPSED = POUR_TIMELINE.rise + 1

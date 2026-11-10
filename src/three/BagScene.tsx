@@ -1,7 +1,5 @@
-import { useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import { ContactShadows, RoundedBox, Sparkles } from '@react-three/drei'
-import { MathUtils, type Group } from 'three'
 import { Fish3D } from './models'
 import { StudioEnvironment } from './StudioEnvironment'
 
@@ -12,9 +10,6 @@ const SACK_W = 1.75
 const SACK_H = 1.3
 const SACK_D = 1.05
 const RIM_R = 0.11
-const DROP_GAP = 0.38
-const FALL_TIME = 0.75
-const START_Y = 3.8
 const FISH_SCALE = 0.72
 const clay = { roughness: 0.85, metalness: 0 }
 
@@ -28,35 +23,13 @@ const SLOTS: { pos: [number, number, number]; tilt: number }[] = [
   { pos: [0.0, 1.98, -0.36], tilt: 0.1 },
 ]
 
-function bounce(k: number): number {
-  if (k < 1 / 2.75) return 7.5625 * k * k
-  if (k < 2 / 2.75) return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75
-  if (k < 2.5 / 2.75) return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375
-  return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375
-}
-
+/** A fish already settled in its slot; when the bag is closing it sits a little lower, inside the sack. */
 function FallingFish({ index, filling, closing }: { index: number; filling: string; closing: boolean }) {
-  const ref = useRef<Group>(null)
-  const born = useRef(-1)
-  const sink = useRef(0)
   const { pos, tilt } = SLOTS[index]
-
-  useFrame(({ clock }, delta) => {
-    if (!ref.current) return
-    const t = clock.elapsedTime
-    if (born.current < 0) born.current = t
-    const k = MathUtils.clamp((t - born.current - index * DROP_GAP) / FALL_TIME, 0, 1)
-    sink.current = MathUtils.damp(sink.current, closing ? 0.9 : 0, 5, delta)
-    const idle = k >= 1 ? Math.sin(t * 2 + index) * 0.02 : 0
-    ref.current.visible = k > 0
-    ref.current.position.y = MathUtils.lerp(START_Y, pos[1], bounce(k)) + idle - sink.current
-    ref.current.rotation.z = tilt + (1 - k) * 1.6
-    const squash = k >= 1 ? 1 : 1 + Math.sin(k * Math.PI) * 0.06
-    ref.current.scale.set(FISH_SCALE * squash, FISH_SCALE / squash, FISH_SCALE)
-  })
+  const sink = closing ? 0.9 : 0
 
   return (
-    <group ref={ref} position={[pos[0], START_Y, pos[2]]} visible={false}>
+    <group position={[pos[0], pos[1] - sink, pos[2]]} rotation={[0, 0, tilt]} scale={FISH_SCALE}>
       <group rotation={[0, Math.PI, 0]}>
         <Fish3D filling={filling} />
       </group>
@@ -90,17 +63,9 @@ function RolledRim() {
   )
 }
 
-function Sack({ closing }: { closing: boolean }) {
-  const body = useRef<Group>(null)
-  useFrame(({ clock }, delta) => {
-    if (!body.current) return
-    const hop = closing ? Math.abs(Math.sin(clock.elapsedTime * 7)) * 0.14 : 0
-    body.current.position.y = MathUtils.damp(body.current.position.y, hop, 12, delta)
-    const breathe = 1 + Math.sin(clock.elapsedTime * 1.6) * 0.01
-    body.current.scale.set(breathe, 1 / breathe, breathe)
-  })
+function Sack() {
   return (
-    <group ref={body}>
+    <group>
       <RoundedBox args={[SACK_W, SACK_H, SACK_D]} radius={0.2} smoothness={6} position={[0, SACK_H / 2, 0]} castShadow receiveShadow>
         <meshStandardMaterial color={SACK} {...clay} />
       </RoundedBox>
@@ -123,13 +88,13 @@ export default function BagScene({ fillings, closing }: { fillings: string[]; cl
       <StudioEnvironment />
       <hemisphereLight args={['#FFF6E6', '#F2C27A', 0.7]} />
       <directionalLight position={[-2.5, 6, 4]} intensity={1.6} castShadow shadow-mapSize={[1024, 1024]} />
-      <Sack closing={closing} />
+      <Sack />
       <group key={shown.join('|')}>
         {shown.map((filling, i) => (
           <FallingFish key={i} index={i} filling={filling} closing={closing} />
         ))}
       </group>
-      {closing && <Sparkles count={20} scale={[2, 1.2, 1]} position={[0, 1.8, 0]} size={6} speed={0.8} color="#FFD27A" />}
+      {closing && <Sparkles count={20} scale={[2, 1.2, 1]} position={[0, 1.8, 0]} size={6} speed={0} color="#FFD27A" />}
       <ContactShadows position={[0, 0, 0]} opacity={0.35} scale={4} blur={2.4} far={2} />
     </Canvas>
   )

@@ -1,12 +1,9 @@
-import { useMemo, useRef, type RefObject } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useMemo } from 'react'
 import { RoundedBox } from '@react-three/drei'
-import { ExtrudeGeometry, MathUtils, type Group, type Mesh, type MeshStandardMaterial } from 'three'
+import { ExtrudeGeometry } from 'three'
 import { fishOutline } from './Fish3D'
-import { BATTER } from './BottleCaddy'
-import { BODY_CENTER_X, CavityContents, PourStream, useFlatFish } from './MoldContents'
-import { BAKE_SPIN, type SceneMode } from './sceneMode'
-import { useStepClock } from './useStepClock'
+import { BODY_CENTER_X, CavityContents, useFlatFish } from './MoldContents'
+import type { SceneMode } from './sceneMode'
 
 export const MOLD_X = 0.3
 export const MOLD_Y = 0.55
@@ -29,20 +26,12 @@ const CAVITY = '#3A2318'
 const GOLD = '#C9A05A'
 const POST = '#6B4535'
 const LID_OPEN = -1.95
-/** Seconds into baking: lid shuts first, then the closed mold spins until BAKE_SPIN, then opens. */
-const SPIN_FROM = 0.7
 
 function Flames() {
-  const group = useRef<Group>(null)
-  useFrame(({ clock }) => {
-    group.current?.children.forEach((flame, i) => {
-      flame.scale.y = 1 + Math.sin(clock.elapsedTime * 12 + i * 1.7) * 0.25
-    })
-  })
   return (
     <group position={[MOLD_X, 0.12, MOLD_Z]}>
       <pointLight position={[0, 0.3, 0.3]} color="#FF8A3D" intensity={3} distance={2.5} />
-      <group ref={group}>
+      <group>
         {[-0.45, -0.22, 0, 0.22, 0.45].map((x, i) => (
           <mesh key={x} position={[x, 0.14, (i % 2) * 0.12 - 0.06]}>
             <coneGeometry args={[0.1, 0.36, 16]} />
@@ -50,32 +39,6 @@ function Flames() {
           </mesh>
         ))}
       </group>
-    </group>
-  )
-}
-
-const PUFFS = 8
-
-/** Soft steam puffs rising off the mold while it bakes and right after it opens. */
-function Steam({ active }: { active: boolean }) {
-  const group = useRef<Group>(null)
-  useFrame(({ clock }) => {
-    group.current?.children.forEach((puff, i) => {
-      const k = (clock.elapsedTime * 0.45 + i / PUFFS) % 1
-      puff.position.set(Math.sin(i * 2.1 + k * 3) * 0.35, 0.15 + k * 0.9, Math.cos(i * 1.3) * 0.15)
-      puff.scale.setScalar(0.6 + k * 1.2)
-      const material = (puff as Mesh).material as MeshStandardMaterial
-      material.opacity = active ? Math.sin(k * Math.PI) * 0.45 : 0
-    })
-  })
-  return (
-    <group ref={group} position={[MOLD_X, MOLD_Y + MOLD_FACE, MOLD_Z]}>
-      {Array.from({ length: PUFFS }, (_, i) => (
-        <mesh key={i}>
-          <sphereGeometry args={[0.09, 16, 16]} />
-          <meshStandardMaterial color="#FFFFFF" transparent opacity={0} depthWrite={false} />
-        </mesh>
-      ))}
     </group>
   )
 }
@@ -89,10 +52,10 @@ function useReliefFish(): ExtrudeGeometry {
 }
 
 /** Lid: plain inside, raised fish on the outside, hinged on the back edge. */
-function Lid({ lid, seam }: { lid: RefObject<Group | null>; seam: RefObject<MeshStandardMaterial | null> }) {
+function Lid() {
   const relief = useReliefFish()
   return (
-    <group ref={lid} position={[0, MOLD_FACE, -PLATE[2] / 2]} rotation={[LID_OPEN, 0, 0]}>
+    <group position={[0, MOLD_FACE, -PLATE[2] / 2]} rotation={[LID_OPEN, 0, 0]}>
       <group position={[0, 0, PLATE[2] / 2]}>
         <RoundedBox args={[PLATE[0], 0.14, PLATE[2]]} radius={0.06} smoothness={4} position={[0, 0.07, 0]} castShadow>
           <meshStandardMaterial color={MOLD} roughness={0.5} metalness={0.25} />
@@ -104,7 +67,7 @@ function Lid({ lid, seam }: { lid: RefObject<Group | null>; seam: RefObject<Mesh
         ))}
         <mesh position={[0, -0.004, 0]}>
           <boxGeometry args={[PLATE[0] - 0.12, 0.006, PLATE[2] - 0.12]} />
-          <meshStandardMaterial ref={seam} color={MOLD} emissive="#FF7A1A" emissiveIntensity={0} />
+          <meshStandardMaterial color={MOLD} emissive="#FF7A1A" emissiveIntensity={0} />
         </mesh>
       </group>
     </group>
@@ -156,32 +119,14 @@ function Stand() {
   )
 }
 
-/** Two-fish mold on an axle over the burner: batter, filling, lid shuts and spins over fire, then opens on golden fish. */
-export function MoldRig({ mode, filling, cue }: { mode: SceneMode; filling: string; cue: number }) {
-  const clock = useStepClock(mode, cue)
-  const spin = useRef<Group>(null)
-  const lid = useRef<Group>(null)
-  const seam = useRef<MeshStandardMaterial>(null)
-
-  useFrame(({ clock: { elapsedTime: t } }, delta) => {
-    const e = clock.current.elapsed
-    const baking = mode === 'baking'
-    const closed = baking && e < BAKE_SPIN + 0.2
-    const spinning = baking && e >= SPIN_FROM && e < BAKE_SPIN
-    if (spin.current) {
-      const rot = spin.current.rotation.x
-      spin.current.rotation.x = spinning ? rot + delta * 3.4 : MathUtils.damp(rot, Math.round(rot / (Math.PI * 2)) * Math.PI * 2, 6, delta)
-    }
-    if (lid.current) lid.current.rotation.x = MathUtils.damp(lid.current.rotation.x, closed ? 0 : LID_OPEN, 7, delta)
-    if (seam.current) seam.current.emissiveIntensity = closed && e > 0.4 ? 1.4 + Math.sin(t * 8) * 0.5 : 0
-  })
-
+/** Two-fish mold on an axle over the burner, frozen at the end of its step: full, and open on the baked fish once baking is done. */
+export function MoldRig({ mode, filling }: { mode: SceneMode; filling: string; cue: number }) {
   const baking = mode === 'baking'
   return (
     <group>
       <Stand />
       {baking && <Flames />}
-      <group ref={spin} position={[MOLD_X, MOLD_Y, MOLD_Z]}>
+      <group position={[MOLD_X, MOLD_Y, MOLD_Z]}>
         <RoundedBox args={[PLATE[0] + 0.05, 0.05, PLATE[2] + 0.04]} radius={0.02} smoothness={2} position={[0, -0.1, 0]}>
           <meshStandardMaterial color={GOLD} roughness={0.4} metalness={0.4} />
         </RoundedBox>
@@ -197,13 +142,11 @@ export function MoldRig({ mode, filling, cue }: { mode: SceneMode; filling: stri
         {CAVITY_X.map((x, i) => (
           <group key={x} position={[x - MOLD_X, MOLD_FACE, 0]} rotation={[0, Math.PI, 0]}>
             <Cavity />
-            <CavityContents cavity={i as 0 | 1} mode={mode} filling={filling} clock={clock} scale={FISH_SCALE} />
+            <CavityContents cavity={i as 0 | 1} mode={mode} filling={filling} scale={FISH_SCALE} />
           </group>
         ))}
-        <Lid lid={lid} seam={seam} />
+        <Lid />
       </group>
-      <PourStream key={`${mode}-${cue}`} mode={mode} color={mode === 'filling' ? filling : BATTER} clock={clock} points={POUR_POINTS} height={POUR_TOP} />
-      <Steam active={baking} />
     </group>
   )
 }
